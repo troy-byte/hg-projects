@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SF to AGM Data Migration Map — Heavenly Greens</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0f1a; color: #e0e0e0; padding: 24px; }
+
+  h1 { text-align: center; font-size: 28px; color: #fff; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #8a9bb5; font-size: 14px; margin-bottom: 32px; }
+
+  /* Legend */
+  .legend { display: flex; justify-content: center; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #8a9bb5; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .legend-dot.direct { background: #22c55e; }
+  .legend-dot.custom { background: #3b82f6; }
+  .legend-dot.note { background: #a855f7; }
+  .legend-dot.pipeline { background: #f59e0b; }
+  .legend-dot.file { background: #ec4899; }
+  .legend-dot.skip { background: #64748b; }
+  .legend-dot.decision { background: #ef4444; border: 2px dashed #ef4444; background: transparent; }
+
+  /* Flow container */
+  .flow-section { margin-bottom: 40px; }
+  .section-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 16px; padding-left: 12px; border-left: 4px solid #3b82f6; }
+
+  /* Flow row */
+  .flow-row { display: grid; grid-template-columns: 280px 60px 320px 1fr; align-items: center; gap: 0; margin-bottom: 6px; padding: 8px 12px; border-radius: 8px; transition: background 0.15s; }
+  .flow-row:hover { background: rgba(255,255,255,0.04); }
+
+  /* SF source box */
+  .sf-box { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; font-size: 13px; }
+  .sf-box .obj-name { font-weight: 600; color: #60a5fa; }
+  .sf-box .field-name { color: #94a3b8; font-size: 12px; }
+  .sf-box .record-count { color: #64748b; font-size: 11px; float: right; margin-top: 2px; }
+
+  /* Arrow */
+  .arrow { text-align: center; color: #475569; font-size: 20px; }
+  .arrow.direct { color: #22c55e; }
+  .arrow.custom { color: #3b82f6; }
+  .arrow.note { color: #a855f7; }
+  .arrow.pipeline { color: #f59e0b; }
+  .arrow.file { color: #ec4899; }
+  .arrow.skip { color: #64748b; }
+
+  /* AGM destination box */
+  .agm-box { border-radius: 6px; padding: 8px 12px; font-size: 13px; }
+  .agm-box.direct { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); }
+  .agm-box.custom { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); }
+  .agm-box.note { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3); }
+  .agm-box.pipeline { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); }
+  .agm-box.file { background: rgba(236,72,153,0.12); border: 1px solid rgba(236,72,153,0.3); }
+  .agm-box.skip { background: rgba(100,116,139,0.08); border: 1px dashed rgba(100,116,139,0.3); }
+  .agm-box.decision { background: rgba(239,68,68,0.08); border: 2px dashed rgba(239,68,68,0.4); }
+  .agm-box .dest-name { font-weight: 600; color: #fff; }
+  .agm-box .dest-detail { color: #94a3b8; font-size: 12px; margin-top: 2px; }
+  .agm-box.skip .dest-name { color: #64748b; }
+  .agm-box.decision .dest-name { color: #fca5a5; }
+
+  /* Method tag */
+  .method { font-size: 11px; color: #64748b; padding-left: 8px; }
+  .method .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .method .tag.direct { background: rgba(34,197,94,0.2); color: #22c55e; }
+  .method .tag.custom { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .method .tag.note { background: rgba(168,85,247,0.2); color: #a855f7; }
+  .method .tag.pipeline { background: rgba(245,158,11,0.2); color: #f59e0b; }
+  .method .tag.file { background: rgba(236,72,153,0.2); color: #ec4899; }
+  .method .tag.skip { background: rgba(100,116,139,0.2); color: #94a3b8; }
+  .method .tag.decision { background: rgba(239,68,68,0.2); color: #fca5a5; }
+
+  /* Stats bar */
+  .stats { display: flex; justify-content: center; gap: 40px; margin: 32px 0; padding: 16px; background: #111827; border-radius: 8px; border: 1px solid #1e293b; }
+  .stat { text-align: center; }
+  .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
+  .stat-label { font-size: 12px; color: #8a9bb5; margin-top: 2px; }
+
+  /* Decision callouts */
+  .decision-box { background: rgba(239,68,68,0.06); border: 1px dashed rgba(239,68,68,0.3); border-radius: 8px; padding: 16px; margin: 16px 0 32px 0; }
+  .decision-box h3 { color: #fca5a5; font-size: 14px; margin-bottom: 8px; }
+  .decision-box ul { list-style: none; padding: 0; }
+  .decision-box li { color: #94a3b8; font-size: 13px; padding: 4px 0; padding-left: 20px; position: relative; }
+  .decision-box li::before { content: '?'; position: absolute; left: 0; color: #ef4444; font-weight: 700; }
+
+  /* Footer */
+  .footer { text-align: center; color: #475569; font-size: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #1e293b; }
+
+  /* Subfield list */
+  .subfields { margin-top: 6px; padding-left: 12px; border-left: 2px solid rgba(255,255,255,0.06); }
+  .subfield { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; padding: 2px 0; }
+  .subfield .sf-f { color: #94a3b8; }
+  .subfield .agm-f { color: #60a5fa; }
+
+  /* Pipeline visual */
+  .pipeline-visual { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+  .pipeline-stage { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+  .pipeline-stage.active { background: rgba(245,158,11,0.3); border-color: rgba(245,158,11,0.5); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .flow-row { grid-template-columns: 1fr; gap: 8px; }
+    .arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<h1>Salesforce to AGM Data Migration Map</h1>
+<p class="subtitle">Heavenly Greens — Every SF object mapped to its AGM destination</p>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value">14</div>
+    <div class="stat-label">SF Objects</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">430</div>
+    <div class="stat-label">AGM Custom Fields</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">4</div>
+    <div class="stat-label">AGM Pipelines</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">120K+</div>
+    <div class="stat-label">SF Attachments</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">176 GB</div>
+    <div class="stat-label">File Storage</div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot direct"></div> Direct Field Mapping</div>
+  <div class="legend-item"><div class="legend-dot custom"></div> Custom Field</div>
+  <div class="legend-item"><div class="legend-dot pipeline"></div> Pipeline Opportunity</div>
+  <div class="legend-item"><div class="legend-dot note"></div> Structured Note</div>
+  <div class="legend-item"><div class="legend-dot file"></div> File Upload / CDN</div>
+  <div class="legend-item"><div class="legend-dot skip"></div> Skip / Not Needed</div>
+  <div class="legend-item"><div class="legend-dot decision"></div> Decision Required</div>
+</div>
+
+<!-- ========== SECTION: CORE CUSTOMER ========== -->
+<div class="flow-section">
+  <div class="section-title">Core Customer Record</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Contact</span>
+      <span class="field-name"> — FirstName, LastName, Phone, Email, Address</span>
+    </div>
+    <div class="arrow direct">&rarr;</div>
+    <div class="agm-box direct">
+      <div class="dest-name">AGM Contact — Standard Fields</div>
+      <div class="dest-detail">firstName, lastName, phone, email, address1, city, state, postalCode</div>
+    </div>
+    <div class="method"><span class="tag direct">direct</span> 1:1 field mapping</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Contact</span>
+      <span class="field-name"> — Mobile_2__c, Mobile_3__c, Alt_Email__c</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — Additional Phones/Emails</div>
+      <div class="dest-detail">additionalPhones, additionalEmails (object format)</div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> Needs object wrapper</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Contact</span>
+      <span class="field-name"> — LeadSource, Lead_Secondary_Source__c</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — Source + Custom Fields</div>
+      <div class="dest-detail">source, "SOURCE - FIRST CONTACT", "How did you hear about us?", "SF Lead Secondary Source"</div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> Source + 3 custom fields</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Account</span>
+      <span class="field-name"> — Container for Contact + Opportunities</span>
+    </div>
+    <div class="arrow skip">&rarr;</div>
+    <div class="agm-box skip">
+      <div class="dest-name">Skip — No Account concept in AGM</div>
+      <div class="dest-detail">Contact is the top-level parent in AGM</div>
+    </div>
+    <div class="method"><span class="tag skip">skip</span></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Lead</span>
+      <span class="field-name"> — Pre-conversion record</span>
+    </div>
+    <div class="arrow skip">&rarr;</div>
+    <div class="agm-box skip">
+      <div class="dest-name">Skip — Data lives on Contact post-conversion</div>
+      <div class="dest-detail">Active leads already syncing via costco_lead_intake.py</div>
+    </div>
+    <div class="method"><span class="tag skip">skip</span> Already handled by live pipeline</div>
+  </div>
+</div>
+
+<!-- ========== SECTION: JOB / OPPORTUNITY ========== -->
+<div class="flow-section">
+  <div class="section-title">Job (Opportunity) — 164 fields in SF</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Opportunity</span>
+      <span class="field-name"> — Name, StageName, Amount, Total_Price__c</span>
+    </div>
+    <div class="arrow pipeline">&rarr;</div>
+    <div class="agm-box pipeline">
+      <div class="dest-name">AGM Opportunity — Pipeline: 1. Lead Flow</div>
+      <div class="dest-detail">name, pipelineStageId (13 stages mapped), monetaryValue, status (won/lost/open)</div>
+      <div class="pipeline-visual">
+        <span class="pipeline-stage">Lead</span>
+        <span class="pipeline-stage">Appt Booked</span>
+        <span class="pipeline-stage">Appt Ran</span>
+        <span class="pipeline-stage">Proposal Out</span>
+        <span class="pipeline-stage">Approved</span>
+        <span class="pipeline-stage">Deposit Sent</span>
+        <span class="pipeline-stage">Deposit Rcvd</span>
+        <span class="pipeline-stage">Install Started</span>
+        <span class="pipeline-stage">Installed</span>
+        <span class="pipeline-stage active">Paid in Full</span>
+        <span class="pipeline-stage">No Show</span>
+        <span class="pipeline-stage">Lost</span>
+      </div>
+    </div>
+    <div class="method"><span class="tag pipeline">pipeline</span> Stage name mapping</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Opportunity</span>
+      <span class="field-name"> — Total_Price__c, Deposit, Start_of_Work, Final_Payment, Remaining_Balance</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — Financial Custom Fields (existing)</div>
+      <div class="subfields">
+        <div class="subfield"><span class="sf-f">Total_Price__c</span><span class="agm-f">PROJECT TOTAL / TOTAL PROJECT COST</span></div>
+        <div class="subfield"><span class="sf-f">Deposit_at_signing__c</span><span class="agm-f">DEPOSIT</span></div>
+        <div class="subfield"><span class="sf-f">Start_of_Work__c</span><span class="agm-f">START OF WORK</span></div>
+        <div class="subfield"><span class="sf-f">Final_Payment__c</span><span class="agm-f">FINAL PAYMENT</span></div>
+        <div class="subfield"><span class="sf-f">Remaining_Balance__c</span><span class="agm-f">SF Remaining Balance</span></div>
+        <div class="subfield"><span class="sf-f">Change_Order_Amount__c</span><span class="agm-f">SF Change Order Amount</span></div>
+        <div class="subfield"><span class="sf-f">Price_Quoted__c</span><span class="agm-f">TOTAL ESTIMATE</span></div>
+      </div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> 7 monetary fields already exist</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Opportunity</span>
+      <span class="field-name"> — Square_Footage, Crew_Number, Application_Type, Job_Started_Date, etc.</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — Job Detail Custom Fields</div>
+      <div class="subfields">
+        <div class="subfield"><span class="sf-f">Total_Square_Footage__c</span><span class="agm-f">SF Total Square Footage / TOTAL PROJECT AREA</span></div>
+        <div class="subfield"><span class="sf-f">Price_Per_Square_Foot__c</span><span class="agm-f">SF Price Per SqFt</span></div>
+        <div class="subfield"><span class="sf-f">Crew_Number__c</span><span class="agm-f">SF Crew Assignment</span></div>
+        <div class="subfield"><span class="sf-f">Application_Type__c</span><span class="agm-f">SF Application Type</span></div>
+        <div class="subfield"><span class="sf-f">Job_Started_Date__c</span><span class="agm-f">SF Job Started Date</span></div>
+        <div class="subfield"><span class="sf-f">Contract_Approval_Date__c</span><span class="agm-f">SF Contract Approval Date</span></div>
+        <div class="subfield"><span class="sf-f">CloseDate (Completed)</span><span class="agm-f">SF Job Completed Date</span></div>
+        <div class="subfield"><span class="sf-f">OwnerId (resolved)</span><span class="agm-f">SF Salesperson</span></div>
+        <div class="subfield"><span class="sf-f">Opportunity_Address__c</span><span class="agm-f">JOB ADDRESS</span></div>
+        <div class="subfield"><span class="sf-f">Name</span><span class="agm-f">JOB NAME</span></div>
+      </div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> 10 fields (7 new SF-prefix + 3 existing)</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Opportunity</span>
+      <span class="field-name"> — Full record summary (all fields)</span>
+    </div>
+    <div class="arrow note">&rarr;</div>
+    <div class="agm-box note">
+      <div class="dest-name">AGM Notes — "JOB DETAILS" structured note</div>
+      <div class="dest-detail">Complete snapshot: stage, price, sqft, crew, dates, financials, SF IDs</div>
+    </div>
+    <div class="method"><span class="tag note">note</span> Human-readable reference</div>
+  </div>
+</div>
+
+<!-- ========== SECTION: PAYMENTS ========== -->
+<div class="flow-section">
+  <div class="section-title">Payments (Payment__c) — 6 data fields per record</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Payment__c</span>
+      <span class="field-name"> — Payment_Amount, Payment_Method, Payment_Type, Date, Description</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — Financial Custom Fields</div>
+      <div class="dest-detail">Aggregate totals in DEPOSIT, START OF WORK, FINAL PAYMENT. Method in DEPOSIT TYPE, FINAL PAYMENT TYPE.</div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> Aggregated into existing fields</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Payment__c</span>
+      <span class="field-name"> — Individual payment records (3-5 per job)</span>
+    </div>
+    <div class="arrow note">&rarr;</div>
+    <div class="agm-box note">
+      <div class="dest-name">AGM Notes — "PAYMENT HISTORY" structured note</div>
+      <div class="dest-detail">Each record: date | amount | method | type | description. Full detail preserved.</div>
+    </div>
+    <div class="method"><span class="tag note">note</span> Individual records as line items</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Payment__c</span>
+      <span class="field-name"> — Itemized summary for Payment Notes field</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — "Payment Notes" (LARGE_TEXT)</div>
+      <div class="dest-detail">Compact multi-line summary of all payments in one field</div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> Existing field</div>
+  </div>
+</div>
+
+<!-- ========== SECTION: CHANGE ORDERS ========== -->
+<div class="flow-section">
+  <div class="section-title">Change Orders (Change_Order__c) — 6,048 records, $3.85M total</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Change_Order__c</span>
+      <span class="field-name"> — Amount__c (net dollar change)</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — Change Order Custom Fields (existing)</div>
+      <div class="subfields">
+        <div class="subfield"><span class="sf-f">SUM(Amount__c)</span><span class="agm-f">CO TOTAL</span></div>
+        <div class="subfield"><span class="sf-f">Total + CO net</span><span class="agm-f">CO REVISED CONTRACT TOTAL</span></div>
+        <div class="subfield"><span class="sf-f">Description__c</span><span class="agm-f">CO DESCRIPTION</span></div>
+        <div class="subfield"><span class="sf-f">Square footage delta</span><span class="agm-f">CO SQUARE FOOTAGE</span></div>
+      </div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> 50 CO fields already exist in AGM</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Change_Order__c</span>
+      <span class="field-name"> — Active/future jobs (individual COs tracked)</span>
+    </div>
+    <div class="arrow pipeline">&rarr;</div>
+    <div class="agm-box pipeline">
+      <div class="dest-name">AGM Opportunity — Pipeline: 3. Change Order</div>
+      <div class="dest-detail">Each CO = separate opportunity. Stages: Submitted &rarr; Sent &rarr; Approved</div>
+      <div class="pipeline-visual">
+        <span class="pipeline-stage">CO Submitted</span>
+        <span class="pipeline-stage">CO Sent</span>
+        <span class="pipeline-stage active">CO Approved</span>
+      </div>
+    </div>
+    <div class="method"><span class="tag pipeline">pipeline</span> 1 opportunity per CO</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Change_Order__c</span>
+      <span class="field-name"> — Historical/completed jobs (reference only)</span>
+    </div>
+    <div class="arrow note">&rarr;</div>
+    <div class="agm-box note">
+      <div class="dest-name">AGM Notes — "CHANGE ORDERS" structured note</div>
+      <div class="dest-detail">Each CO: number | date | amount | product | description</div>
+    </div>
+    <div class="method"><span class="tag note">note</span> Batched into one reference note</div>
+  </div>
+
+  <div class="decision-box">
+    <h3>Decision Required: Change Order Handling</h3>
+    <ul>
+      <li>Active jobs: individual pipeline opportunities (trackable, stage-based) or just custom fields + notes?</li>
+      <li>Historical completed jobs: structured note sufficient, or does Tim need them as pipeline records too?</li>
+      <li>The 50 existing CO product fields (turf, base, edging, infill, etc.) — should SF CO descriptions be parsed into these, or is the free-text note enough?</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== SECTION: SERVICE HISTORY ========== -->
+<div class="flow-section">
+  <div class="section-title">Service History (Service__c) — Warranty visits, repairs, go-backs</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Service__c</span>
+      <span class="field-name"> — Aggregate metrics (count, revenue, last date)</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — Service History Custom Fields</div>
+      <div class="subfields">
+        <div class="subfield"><span class="sf-f">COUNT(records)</span><span class="agm-f">SF Service History Count</span></div>
+        <div class="subfield"><span class="sf-f">SUM(Amount_Paid__c)</span><span class="agm-f">SF Service History Revenue</span></div>
+        <div class="subfield"><span class="sf-f">MAX(Completed_On__c)</span><span class="agm-f">SF Last Service Date</span></div>
+      </div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> Aggregated into 3 fields</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Service__c</span>
+      <span class="field-name"> — Individual service records (visits spanning years)</span>
+    </div>
+    <div class="arrow note">&rarr;</div>
+    <div class="agm-box note">
+      <div class="dest-name">AGM Notes — "SERVICE HISTORY" structured note</div>
+      <div class="dest-detail">Each visit: service # | completed date | amount paid | go-back status | job info | address</div>
+    </div>
+    <div class="method"><span class="tag note">note</span> Full history preserved</div>
+  </div>
+</div>
+
+<!-- ========== SECTION: ACTIVITIES ========== -->
+<div class="flow-section">
+  <div class="section-title">Activities (Tasks + Events)</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Task</span>
+      <span class="field-name"> — Subject, Status, Description, ActivityDate</span>
+    </div>
+    <div class="arrow note">&rarr;</div>
+    <div class="agm-box note">
+      <div class="dest-name">AGM Notes — "ACTIVITY TIMELINE" structured note</div>
+      <div class="dest-detail">Tasks section: date | subject | status | description</div>
+    </div>
+    <div class="method"><span class="tag note">note</span> Combined with Events</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Event</span>
+      <span class="field-name"> — Subject, Start/EndDateTime, Location, Description</span>
+    </div>
+    <div class="arrow note">&rarr;</div>
+    <div class="agm-box note">
+      <div class="dest-name">AGM Notes — "ACTIVITY TIMELINE" structured note</div>
+      <div class="dest-detail">Events section: datetime | subject | location | consultation notes</div>
+    </div>
+    <div class="method"><span class="tag note">note</span> Consultation details preserved</div>
+  </div>
+</div>
+
+<!-- ========== SECTION: FILES ========== -->
+<div class="flow-section">
+  <div class="section-title">Files & Documents — 120,585 attachments (176 GB)</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Attachment (PDF)</span>
+      <span class="field-name"> — Job builds, contracts, site plans</span>
+      <span class="record-count">48,444</span>
+    </div>
+    <div class="arrow file">&rarr;</div>
+    <div class="agm-box file">
+      <div class="dest-name">AGM CDN — FILE_UPLOAD Custom Fields</div>
+      <div class="dest-detail">Upload via /medias/upload-file, link in General Image 1-5, Job Drawing, Job Access 1-2, Job Area 1-2</div>
+    </div>
+    <div class="method"><span class="tag file">file</span> Binary download &rarr; AGM CDN upload</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Attachment (JPEG/PNG)</span>
+      <span class="field-name"> — Job photos, site images</span>
+      <span class="record-count">44,216</span>
+    </div>
+    <div class="arrow file">&rarr;</div>
+    <div class="agm-box file">
+      <div class="dest-name">AGM CDN — FILE_UPLOAD Custom Fields</div>
+      <div class="dest-detail">Same upload path. 12 FILE_UPLOAD fields available per contact.</div>
+    </div>
+    <div class="method"><span class="tag file">file</span> Binary download &rarr; AGM CDN upload</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Attachment (XLSM)</span>
+      <span class="field-name"> — Commission sheets (Excel macros)</span>
+      <span class="record-count">16,501</span>
+    </div>
+    <div class="arrow file">&rarr;</div>
+    <div class="agm-box decision">
+      <div class="dest-name">Google Drive — Converted to Google Sheets</div>
+      <div class="dest-detail">Convert .xlsm &rarr; Google Sheet, store in per-customer Drive folder. Link in AGM custom field.</div>
+    </div>
+    <div class="method"><span class="tag decision">decision</span> Requires conversion pipeline</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Attachment (DOCX)</span>
+      <span class="field-name"> — Word documents</span>
+      <span class="record-count">6,711</span>
+    </div>
+    <div class="arrow file">&rarr;</div>
+    <div class="agm-box file">
+      <div class="dest-name">AGM CDN or Google Drive</div>
+      <div class="dest-detail">AGM accepts DOCX natively for upload. Or convert to Google Doc.</div>
+    </div>
+    <div class="method"><span class="tag file">file</span></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Attachment (links)</span>
+      <span class="field-name"> — All uploaded file URLs</span>
+    </div>
+    <div class="arrow note">&rarr;</div>
+    <div class="agm-box note">
+      <div class="dest-name">AGM Notes — "SALESFORCE DOCUMENTS" note</div>
+      <div class="dest-detail">Clickable links to all uploaded files (CDN + Drive)</div>
+    </div>
+    <div class="method"><span class="tag note">note</span> Document index note</div>
+  </div>
+
+  <div class="decision-box">
+    <h3>Decision Required: File Strategy</h3>
+    <ul>
+      <li>AGM has 12 FILE_UPLOAD fields per contact — enough for key docs, but not for customers with 20+ attachments. Overflow strategy?</li>
+      <li>176 GB total — full migration or only active/recent customers? Cutoff date?</li>
+      <li>Excel commission sheets: convert to Google Sheets, or skip entirely (internal-only docs)?</li>
+      <li>Per-customer Google Drive folder structure, or flat AGM CDN storage?</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== SECTION: DOCUSIGN ========== -->
+<div class="flow-section">
+  <div class="section-title">DocuSign Envelopes — 32,471 signed documents</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">dsfs__DocuSign_Status__c</span>
+      <span class="field-name"> — Envelope status, signed contracts</span>
+      <span class="record-count">32,471</span>
+    </div>
+    <div class="arrow file">&rarr;</div>
+    <div class="agm-box decision">
+      <div class="dest-name">Decision: Download signed PDF &rarr; AGM CDN, or link to DocuSign directly</div>
+      <div class="dest-detail">DocuSign API can retrieve completed envelope PDFs. Alternatively, store DocuSign envelope URL as a custom field.</div>
+    </div>
+    <div class="method"><span class="tag decision">decision</span> Depends on DocuSign retention plan</div>
+  </div>
+
+  <div class="decision-box">
+    <h3>Decision Required: DocuSign Strategy</h3>
+    <ul>
+      <li>Are signed contracts needed in AGM, or does HG keep DocuSign as the contract archive?</li>
+      <li>If migrating: download completed PDFs via DocuSign API &rarr; upload to AGM CDN (same path as other PDFs)</li>
+      <li>If linking only: store DocuSign envelope URL in a "Signed Contract" custom field (TEXT)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== SECTION: INSTALLATION PIPELINE ========== -->
+<div class="flow-section">
+  <div class="section-title">Installation Lifecycle</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Opportunity</span>
+      <span class="field-name"> — Job lifecycle stages (Approved &rarr; Scheduled &rarr; Started &rarr; Completed)</span>
+    </div>
+    <div class="arrow pipeline">&rarr;</div>
+    <div class="agm-box pipeline">
+      <div class="dest-name">AGM Opportunity — Pipeline: 2. Installation</div>
+      <div class="dest-detail">14 stages covering full installation lifecycle</div>
+      <div class="pipeline-visual">
+        <span class="pipeline-stage">Received</span>
+        <span class="pipeline-stage">Reviewed</span>
+        <span class="pipeline-stage">Approved</span>
+        <span class="pipeline-stage">Materials</span>
+        <span class="pipeline-stage">Inspect Needed</span>
+        <span class="pipeline-stage">Inspect Done</span>
+        <span class="pipeline-stage">On Hold</span>
+        <span class="pipeline-stage">Delayed</span>
+        <span class="pipeline-stage">Scheduled</span>
+        <span class="pipeline-stage">Crew Assigned</span>
+        <span class="pipeline-stage">Started</span>
+        <span class="pipeline-stage active">Completed</span>
+        <span class="pipeline-stage">Wrap Up</span>
+        <span class="pipeline-stage">Finished</span>
+      </div>
+    </div>
+    <div class="method"><span class="tag pipeline">pipeline</span> Same contact, 2nd pipeline</div>
+  </div>
+</div>
+
+<!-- ========== SECTION: SKIP ========== -->
+<div class="flow-section">
+  <div class="section-title">Not Migrated — Legacy / Redundant Systems</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">INVOCA Call Logs</span>
+      <span class="field-name"> — Call tracking data</span>
+    </div>
+    <div class="arrow skip">&rarr;</div>
+    <div class="agm-box skip">
+      <div class="dest-name">Skip — AGM has native call tracking</div>
+      <div class="dest-detail">AGM tracks all inbound/outbound calls, SMS, and emails natively</div>
+    </div>
+    <div class="method"><span class="tag skip">skip</span></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">HubSpot Intelligence</span>
+      <span class="field-name"> — Legacy marketing integration</span>
+    </div>
+    <div class="arrow skip">&rarr;</div>
+    <div class="agm-box skip">
+      <div class="dest-name">Skip — Legacy package, not customer data</div>
+    </div>
+    <div class="method"><span class="tag skip">skip</span></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Slack Messages</span>
+      <span class="field-name"> — SF Slack integration objects</span>
+    </div>
+    <div class="arrow skip">&rarr;</div>
+    <div class="agm-box skip">
+      <div class="dest-name">Skip — Internal communication, not customer data</div>
+    </div>
+    <div class="method"><span class="tag skip">skip</span></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">QuickBooks Sync (AVSFQB)</span>
+      <span class="field-name"> — QB IDs, invoice sync, billing data</span>
+    </div>
+    <div class="arrow skip">&rarr;</div>
+    <div class="agm-box decision">
+      <div class="dest-name">Decision: Skip or preserve QB reference IDs</div>
+      <div class="dest-detail">QB sync fields exist on Opportunity and Payment. If QB integration continues separately, skip. If not, preserve IDs as custom field.</div>
+    </div>
+    <div class="method"><span class="tag decision">decision</span></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Inventory__c / Planned_Materials__c</span>
+      <span class="field-name"> — Job materials and inventory tracking</span>
+    </div>
+    <div class="arrow note">&rarr;</div>
+    <div class="agm-box note">
+      <div class="dest-name">AGM Notes — Materials list per job</div>
+      <div class="dest-detail">Structured note with quantities and product names</div>
+    </div>
+    <div class="method"><span class="tag note">note</span> If needed for reference</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Crew__c / Crew_Members__c</span>
+      <span class="field-name"> — Crew roster and assignments</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — "SF Crew Assignment" (TEXT)</div>
+      <div class="dest-detail">Crew name stored as text. Full crew roster is operational data, not per-customer.</div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> Name only, not full roster</div>
+  </div>
+</div>
+
+<!-- ========== CROSS-REFERENCE ========== -->
+<div class="flow-section">
+  <div class="section-title">Cross-Reference & Sync Tracking</div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Contact.Id</span>
+      <span class="field-name"> — SF Contact ID</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — "SF Contact ID" (TEXT)</div>
+      <div class="dest-detail">Enables reverse lookup: AGM &rarr; SF for any record</div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span> Bidirectional link</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Opportunity.Id</span>
+      <span class="field-name"> — SF Opportunity ID</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — "SF Opportunity ID" (TEXT)</div>
+      <div class="dest-detail">Links to primary job in SF</div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Migration timestamp</span>
+      <span class="field-name"> — When the record was synced</span>
+    </div>
+    <div class="arrow custom">&rarr;</div>
+    <div class="agm-box custom">
+      <div class="dest-name">AGM Contact — "SF Record Synced Date" (DATE)</div>
+      <div class="dest-detail">Tracks when data was last pulled from SF</div>
+    </div>
+    <div class="method"><span class="tag custom">custom</span></div>
+  </div>
+
+  <div class="flow-row">
+    <div class="sf-box">
+      <span class="obj-name">Migration flag</span>
+    </div>
+    <div class="arrow direct">&rarr;</div>
+    <div class="agm-box direct">
+      <div class="dest-name">AGM Contact — Tag: "sf-migrated"</div>
+      <div class="dest-detail">Identifies which contacts have been enriched from SF</div>
+    </div>
+    <div class="method"><span class="tag direct">direct</span> Tag on contact</div>
+  </div>
+</div>
+
+<div class="footer">
+  SF to AGM Migration Map — Heavenly Greens — Generated 2026-03-23 by Harlan | AGM Pro Tools<br>
+  Script: execution/sf_to_agm_migration.py — POC: Jerry Ellis (Contact 3Lfzi6RgJyQsrUcL2JQm)
+</div>
+
+</body>
+</html>
