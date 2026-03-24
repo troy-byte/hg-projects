@@ -6,497 +6,376 @@
 <title>HG & ATE Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" />
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background: #111827;
+  background: #000;
   color: #e5e7eb;
   min-height: 100vh;
   display: flex;
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, .nav-label, .section-header, .stat-label {
-  font-family: 'Space Grotesk', sans-serif;
+h1, h2, h3, h4, .section-hdr, .stat-label, .nav-label {
+  font-family: 'Sora', sans-serif;
 }
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
 /* ── SIDEBAR ── */
 .sidebar {
-  width: 240px;
-  background: #1f2937;
-  border-right: 1px solid #374151;
+  width: 220px;
+  background: #0a0a0a;
+  border-right: 1px solid #1e1e1e;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
   z-index: 100;
 }
 
-.sidebar-header {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid #374151;
+.sidebar-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid #1e1e1e;
 }
 
-.sidebar-header h1 {
-  font-size: 1.125rem;
+.sidebar-brand h1 {
+  font-size: 1rem;
   font-weight: 700;
   color: #fff;
-  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
-.sidebar-header p {
-  font-size: 0.6875rem;
-  color: #6b7280;
-  margin-top: 2px;
-  letter-spacing: 0.02em;
+.sidebar-brand p {
+  font-size: 0.625rem;
+  color: #555;
+  margin-top: 3px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
-.sidebar-nav {
-  flex: 1;
-  padding: 12px 0;
-  overflow-y: auto;
-}
+.sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
 
 .nav-btn {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
+  gap: 10px;
+  padding: 9px 20px;
   border: none;
   background: none;
-  color: #9ca3af;
+  color: #666;
   font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
   text-align: left;
-  border-right: 2px solid transparent;
+  border-left: 2px solid transparent;
 }
 
-.nav-btn:hover {
-  background: rgba(255,255,255,0.03);
-  color: #d1d5db;
-}
+.nav-btn:hover { color: #aaa; background: #0f0f0f; }
 
 .nav-btn.active {
-  background: rgba(59,130,246,0.08);
-  color: #60a5fa;
-  border-right-color: #3b82f6;
+  color: #fff;
+  background: #111;
+  border-left-color: #3b82f6;
 }
 
 .nav-btn svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
+  width: 15px; height: 15px;
   stroke: currentColor;
   fill: none;
-  stroke-width: 2;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+  flex-shrink: 0;
 }
 
-.nav-divider {
+.nav-sep {
   height: 1px;
-  background: #374151;
-  margin: 8px 20px;
+  background: #1a1a1a;
+  margin: 6px 20px;
 }
 
-.sidebar-footer {
-  padding: 12px 20px;
-  border-top: 1px solid #374151;
-  font-size: 0.6875rem;
-  color: #6b7280;
+.sidebar-foot {
+  padding: 14px 20px;
+  border-top: 1px solid #1e1e1e;
+  font-size: 0.625rem;
+  color: #444;
 }
 
-.sidebar-footer .copyright {
-  margin-top: 4px;
-  color: #4b5563;
-}
-
-/* ── MAIN CONTENT ── */
+/* ── MAIN ── */
 .main {
   flex: 1;
-  margin-left: 240px;
-  padding: 32px;
+  margin-left: 220px;
+  padding: 32px 36px;
   min-height: 100vh;
 }
 
 .panel { display: none; }
-.panel.active { display: block; animation: fadeIn 0.2s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+.panel.active { display: block; }
 
 /* ── SECTION HEADERS ── */
-.section-header {
-  font-size: 0.6875rem;
+.section-hdr {
+  font-size: 0.625rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6b7280;
-  margin: 28px 0 12px;
+  color: #555;
+  margin: 32px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1a1a1a;
 }
 
-.section-header:first-child { margin-top: 0; }
+.section-hdr:first-child { margin-top: 0; }
 
-/* ── STAT CARDS ── */
-.stat-row {
+/* ── STATS ROW ── */
+.stats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
 }
 
-.stat-card {
-  background: #1f2937;
-  border: 1px solid #374151;
-  border-radius: 10px;
-  padding: 20px;
+.stat {
+  background: #0a0a0a;
+  border: 1px solid #1e1e1e;
+  border-radius: 8px;
+  padding: 18px 16px;
 }
 
 .stat-label {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #6b7280;
-  margin-bottom: 6px;
+  color: #555;
+  margin-bottom: 4px;
 }
 
-.stat-value {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.75rem;
+.stat-val {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
 }
 
-.stat-value.green { color: #34d399; }
-.stat-value.amber { color: #fbbf24; }
-.stat-value.blue { color: #60a5fa; }
+.stat-val.g { color: #22c55e; }
+.stat-val.a { color: #eab308; }
+.stat-val.b { color: #3b82f6; }
+.stat-val.r { color: #ef4444; }
 
-/* ── PROJECT CARDS ── */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
-  margin-bottom: 8px;
+/* ── PROJECT TABLE ── */
+.proj-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.card {
-  background: #1f2937;
-  border: 1px solid #374151;
-  border-radius: 10px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  transition: border-color 0.2s;
+.proj-table th {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid #1e1e1e;
+  font-family: 'Sora', sans-serif;
 }
 
-.card:hover { border-color: #4b5563; }
-
-.card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+.proj-table td {
+  padding: 12px;
+  border-bottom: 1px solid #111;
+  font-size: 0.8125rem;
+  vertical-align: middle;
 }
 
-.card h3 {
-  font-size: 0.9375rem;
+.proj-table tr:hover td { background: #080808; }
+
+.proj-table .name {
   font-weight: 600;
   color: #fff;
-  line-height: 1.3;
 }
 
-.card .desc {
-  font-size: 0.8125rem;
-  color: #9ca3af;
-  line-height: 1.55;
+.proj-table .detail {
+  color: #666;
+  font-size: 0.75rem;
+  margin-top: 2px;
 }
 
-.card-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.meta-row {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  font-size: 0.8125rem;
-}
-
-.meta-label {
-  color: #6b7280;
-  font-weight: 500;
-  white-space: nowrap;
-  min-width: 72px;
-  flex-shrink: 0;
-}
-
-.meta-value { color: #d1d5db; }
-
-.meta-value a {
-  color: #60a5fa;
+.proj-table a {
+  color: #3b82f6;
   text-decoration: none;
-  transition: color 0.15s;
+  font-weight: 500;
 }
 
-.meta-value a:hover { color: #93bbfd; text-decoration: underline; }
+.proj-table a:hover { color: #60a5fa; text-decoration: underline; }
 
 /* ── BADGES ── */
-.badge {
+.b {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.625rem;
-  font-weight: 600;
-  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 3px 10px;
+  padding: 3px 9px;
   border-radius: 999px;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
-.badge::before {
+.b::before {
   content: '';
-  width: 6px;
-  height: 6px;
+  width: 5px; height: 5px;
   border-radius: 50%;
   background: currentColor;
 }
 
-.badge-live       { color: #34d399; background: rgba(52,211,153,0.1); }
-.badge-progress   { color: #fbbf24; background: rgba(251,191,36,0.1); }
-.badge-not-started { color: #6b7280; background: rgba(107,114,128,0.1); }
-.badge-recurring  { color: #60a5fa; background: rgba(96,165,250,0.1); }
-.badge-blocked    { color: #f87171; background: rgba(248,113,113,0.1); }
+.b-live     { color: #22c55e; background: rgba(34,197,94,0.1); }
+.b-progress { color: #eab308; background: rgba(234,179,8,0.1); }
+.b-nostart  { color: #555;    background: rgba(85,85,85,0.1); }
+.b-recur    { color: #3b82f6; background: rgba(59,130,246,0.1); }
+.b-blocked  { color: #ef4444; background: rgba(239,68,68,0.1); }
 
-/* ── CARD FOOTER / TAGS ── */
-.card-footer {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid #374151;
+/* ── CARD GRID ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: #0a0a0a;
+  border: 1px solid #1e1e1e;
+  border-radius: 8px;
+  padding: 18px;
+  transition: border-color 0.15s;
+}
+
+.card:hover { border-color: #333; }
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.card h3 { font-size: 0.875rem; font-weight: 600; color: #fff; }
+
+.card .desc {
+  font-size: 0.8125rem;
+  color: #777;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.card a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.card a:hover { text-decoration: underline; }
+
+.card-tags {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #1a1a1a;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
 .tag {
-  font-size: 0.625rem;
+  font-size: 0.5625rem;
   font-weight: 600;
-  font-family: 'Space Grotesk', sans-serif;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid #374151;
-  color: #6b7280;
-  padding: 2px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.02em;
+  font-family: 'Sora', sans-serif;
+  background: #111;
+  border: 1px solid #1e1e1e;
+  color: #555;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
 }
 
 /* ── QUICK LINKS ── */
-.quick-links-grid {
+.qlinks {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
-.quick-link {
+.ql {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #1f2937;
-  border: 1px solid #374151;
-  border-radius: 10px;
-  padding: 16px 20px;
+  background: #0a0a0a;
+  border: 1px solid #1e1e1e;
+  border-radius: 8px;
+  padding: 14px 18px;
   text-decoration: none;
   color: #e5e7eb;
-  transition: border-color 0.2s, transform 0.15s;
+  transition: border-color 0.15s;
 }
 
-.quick-link:hover {
-  border-color: #60a5fa;
-  transform: translateY(-1px);
-}
+.ql:hover { border-color: #3b82f6; }
 
-.quick-link-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: rgba(59,130,246,0.1);
+.ql-icon {
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  background: rgba(59,130,246,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.quick-link-icon svg {
-  width: 18px;
-  height: 18px;
-  stroke: #60a5fa;
+.ql-icon svg {
+  width: 16px; height: 16px;
+  stroke: #3b82f6;
   fill: none;
-  stroke-width: 2;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.quick-link-text h4 {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.quick-link-text p {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 2px;
-}
-
-/* ── DASHBOARD PANELS ── */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.dash-panel {
-  background: #1f2937;
-  border: 1px solid #374151;
-  border-radius: 10px;
-  padding: 20px;
-}
-
-.dash-panel-header {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #6b7280;
-  margin-bottom: 14px;
-  font-family: 'Space Grotesk', sans-serif;
-}
-
-.dash-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(55,65,81,0.5);
-}
-
-.dash-item:last-child { border-bottom: none; }
-
-.dash-item-name {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: #d1d5db;
-}
-
-.dash-item-detail {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 1px;
-}
-
-/* ── BACK LINK ── */
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: rgba(59,130,246,0.08);
-  border: 1px solid rgba(59,130,246,0.2);
-  color: #60a5fa;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-
-.back-link:hover {
-  background: rgba(59,130,246,0.15);
-  border-color: rgba(59,130,246,0.35);
-}
-
-.back-link svg {
-  width: 14px;
-  height: 14px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
+.ql h4 { font-size: 0.8125rem; font-weight: 600; color: #fff; }
+.ql p { font-size: 0.6875rem; color: #555; margin-top: 1px; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .sidebar-header {
-    width: 100%;
-    text-align: center;
-  }
-  .sidebar-nav {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 8px;
-    gap: 0;
-  }
-  .nav-btn {
-    width: auto;
-    padding: 8px 14px;
-    border-right: none;
-    border-bottom: 2px solid transparent;
-    font-size: 0.75rem;
-  }
-  .nav-btn.active {
-    border-right: none;
-    border-bottom-color: #3b82f6;
-  }
-  .nav-divider { display: none; }
-  .sidebar-footer { width: 100%; text-align: center; }
-  .main { margin-left: 0; padding: 20px; }
-  .card-grid { grid-template-columns: 1fr; }
-  .stat-row { grid-template-columns: repeat(2, 1fr); }
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .quick-links-grid { grid-template-columns: 1fr; }
+  .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; flex-wrap: wrap; }
+  .sidebar-brand { width: 100%; text-align: center; }
+  .sidebar-nav { display: flex; flex-wrap: wrap; justify-content: center; padding: 6px; }
+  .nav-btn { width: auto; padding: 7px 12px; border-left: none; border-bottom: 2px solid transparent; font-size: 0.75rem; }
+  .nav-btn.active { border-left: none; border-bottom-color: #3b82f6; }
+  .nav-sep { display: none; }
+  .sidebar-foot { width: 100%; text-align: center; }
+  .main { margin-left: 0; padding: 16px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .cards { grid-template-columns: 1fr; }
+  .qlinks { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-<!-- ════════════════ SIDEBAR ════════════════ -->
 <aside class="sidebar">
-  <div class="sidebar-header">
+  <div class="sidebar-brand">
     <h1>HG & ATE<br>Mission Control</h1>
-    <p>Heavenly Greens & Artificial Turf Express</p>
+    <p>Heavenly Greens &bull; Artificial Turf Express</p>
   </div>
-
   <nav class="sidebar-nav">
     <button class="nav-btn active" data-panel="dashboard">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -510,719 +389,404 @@ h1, h2, h3, h4, .nav-label, .section-header, .stat-label {
       <svg viewBox="0 0 24 24"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
       ATE Projects
     </button>
-
-    <div class="nav-divider"></div>
-
-    <button class="nav-btn" data-panel="costco">
-      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-      Costco Program
-    </button>
-    <button class="nav-btn" data-panel="marketing">
-      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Marketing & Ads
-    </button>
-    <button class="nav-btn" data-panel="content">
-      <svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-      Content
-    </button>
-
-    <div class="nav-divider"></div>
-
+    <div class="nav-sep"></div>
     <button class="nav-btn" data-panel="links">
       <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       Quick Links
     </button>
   </nav>
-
-  <div class="sidebar-footer">
+  <div class="sidebar-foot">
     <div id="sidebar-date"></div>
-    <div class="copyright">Heavenly Greens &copy; 2026</div>
+    <div style="margin-top:3px;">Heavenly Greens &copy; 2026</div>
   </div>
 </aside>
 
-<!-- ════════════════ MAIN CONTENT ════════════════ -->
 <main class="main">
 
-  <!-- ──────── DASHBOARD ──────── -->
+  <!-- ════ DASHBOARD ════ -->
   <div id="panel-dashboard" class="panel active">
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="stat-label">HG Projects</div>
-        <div class="stat-value green">11</div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Projects</div>
+        <div class="stat-val">13</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">ATE Projects</div>
-        <div class="stat-value blue">2</div>
-      </div>
-      <div class="stat-card">
+      <div class="stat">
         <div class="stat-label">Live</div>
-        <div class="stat-value green">5</div>
+        <div class="stat-val g">3</div>
       </div>
-      <div class="stat-card">
+      <div class="stat">
         <div class="stat-label">In Progress</div>
-        <div class="stat-value amber">6</div>
+        <div class="stat-val a">6</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Not Started</div>
+        <div class="stat-val">4</div>
       </div>
     </div>
 
-    <div class="dashboard-grid">
+    <!-- HG Projects Table -->
+    <div class="section-hdr">Heavenly Greens &mdash; All Projects</div>
+    <table class="proj-table">
+      <thead>
+        <tr>
+          <th style="width:28%">Project</th>
+          <th style="width:36%">Details</th>
+          <th style="width:16%">Status</th>
+          <th style="width:20%">Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="name">Costco Workflow</div></td>
+          <td>Full lead-to-close CENTAH pipeline. Swimlane diagram deployed.</td>
+          <td><span class="b b-live">Live</span></td>
+          <td><a href="https://troy-byte.github.io/hg-costco-flow/" target="_blank">View Flow</a></td>
+        </tr>
+        <tr>
+          <td><div class="name">CENTAH &rarr; AGM</div></td>
+          <td>Costco lead intake bridged into AGM CRM. ProTools Core ($297/mo).</td>
+          <td><span class="b b-live">Live</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><div class="name">Chat Widget / Turf Advisor</div></td>
+          <td>AI-powered advisor for heavenlygreens.com. In testing.</td>
+          <td><span class="b b-progress">In Progress</span></td>
+          <td><a href="https://agm-pro--hg-chat-widget-demo.modal.run/" target="_blank">Demo</a></td>
+        </tr>
+        <tr>
+          <td><div class="name">SF &rarr; AGM Migration</div></td>
+          <td>32+ custom fields, pipeline opps, PDF uploads. POC complete (Jerry Ellis).</td>
+          <td><span class="b b-progress">In Progress</span></td>
+          <td><a href="sf-agm-migration-map.html" target="_blank">Migration Map</a></td>
+        </tr>
+        <tr>
+          <td><div class="name">Paid Traffic Review</div></td>
+          <td>PPC spot check: Santa Rosa, Manteca, Stockton budgets & results.</td>
+          <td><span class="b b-progress">In Progress</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><div class="name">Facebook Ads</div></td>
+          <td>Review all live campaigns &mdash; content, targeting, spend.</td>
+          <td><span class="b b-progress">In Progress</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><div class="name">NP Digital Report</div></td>
+          <td>Monthly SEO and paid media performance reporting.</td>
+          <td><span class="b b-progress">In Progress</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><div class="name">Atlas Content Production</div></td>
+          <td>Blog, cloud stacks, local short topics, press releases. 4x/mo cadence.</td>
+          <td><span class="b b-progress">In Progress</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><div class="name">HG Newsletter</div></td>
+          <td>Monthly HTML generated by Harlan, posted into AGM sub-account.</td>
+          <td><span class="b b-recur">Recurring</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><div class="name">Long-Form Video Content</div></td>
+          <td>YouTube, broadcast, streaming. HG brand storytelling.</td>
+          <td><span class="b b-nostart">Not Started</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><div class="name">Find Video Producer</div></td>
+          <td>Source via Upwork and network referrals.</td>
+          <td><span class="b b-nostart">Not Started</span></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
 
-      <!-- HG Overview -->
-      <div class="dash-panel">
-        <div class="dash-panel-header">Heavenly Greens</div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">Costco Workflow</div>
-            <div class="dash-item-detail">Full lead-to-close CENTAH pipeline</div>
-          </div>
-          <span class="badge badge-live">Live</span>
-        </div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">SF to AGM Migration</div>
-            <div class="dash-item-detail">POC complete (Jerry Ellis)</div>
-          </div>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">Chat Widget / Turf Advisor</div>
-            <div class="dash-item-detail">AI-powered advisor in testing</div>
-          </div>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">HG Newsletter</div>
-            <div class="dash-item-detail">Monthly HTML via Harlan</div>
-          </div>
-          <span class="badge badge-recurring">Recurring</span>
-        </div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">Paid Traffic Review</div>
-            <div class="dash-item-detail">PPC + Facebook campaigns</div>
-          </div>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-      </div>
+    <!-- ATE Projects Table -->
+    <div class="section-hdr" style="margin-top:36px;">Artificial Turf Express &mdash; All Projects</div>
+    <table class="proj-table">
+      <thead>
+        <tr>
+          <th style="width:28%">Project</th>
+          <th style="width:36%">Details</th>
+          <th style="width:16%">Status</th>
+          <th style="width:20%">Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="name">ATE Newsletter</div></td>
+          <td>Monthly HTML generated by Harlan, posted into AGM sub-account.</td>
+          <td><span class="b b-recur">Recurring</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><div class="name">Square Backend Migration</div></td>
+          <td>Backend changeover to Square. Products + photo integration.</td>
+          <td><span class="b b-nostart">Not Started</span></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
 
-      <!-- ATE Overview -->
-      <div class="dash-panel">
-        <div class="dash-panel-header">Artificial Turf Express</div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">ATE Newsletter</div>
-            <div class="dash-item-detail">Monthly HTML via Harlan</div>
-          </div>
-          <span class="badge badge-recurring">Recurring</span>
-        </div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">Square Backend Migration</div>
-            <div class="dash-item-detail">Products + photo integration</div>
-          </div>
-          <span class="badge badge-not-started">Not Started</span>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="dash-panel">
-        <div class="dash-panel-header">Quick Actions</div>
-        <div class="dash-item">
-          <a href="https://docs.google.com/document/d/17aeXJa2MxbbDKhhBGJChFCIZ8l9zK_m0E8L8P078Ws8/edit" target="_blank" class="dash-item-name" style="color:#60a5fa;text-decoration:none;">Tim & Troy Active To-Do List</a>
-        </div>
-        <div class="dash-item">
-          <a href="https://docs.google.com/document/d/1QbJb3qR_UNqAcMzOwPkchBK9Ft5vGvH2N-A8vSGvFKs/edit" target="_blank" class="dash-item-name" style="color:#60a5fa;text-decoration:none;">Meeting Notes</a>
-        </div>
-        <div class="dash-item">
-          <a href="https://docs.google.com/spreadsheets/d/1pXGeOdWeHf78yjIjED6etSZCqY7WbAXWLsYtFqYmpB8/edit" target="_blank" class="dash-item-name" style="color:#60a5fa;text-decoration:none;">Project Priority Dashboard</a>
-        </div>
-        <div class="dash-item">
-          <a href="https://troy-byte.github.io/agm-mission-control/" target="_blank" class="dash-item-name" style="color:#60a5fa;text-decoration:none;">AGM Mission Control</a>
-        </div>
-      </div>
-
-      <!-- Key Integrations -->
-      <div class="dash-panel">
-        <div class="dash-panel-header">Key Integrations</div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">CENTAH &rarr; AGM</div>
-            <div class="dash-item-detail">Costco lead intake + CRM bridge</div>
-          </div>
-          <span class="badge badge-live">Live</span>
-        </div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">Salesforce &rarr; AGM</div>
-            <div class="dash-item-detail">Record migration pipeline</div>
-          </div>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">NP Digital</div>
-            <div class="dash-item-detail">SEO & paid media reporting</div>
-          </div>
-          <span class="badge badge-live">Live</span>
-        </div>
-        <div class="dash-item">
-          <div>
-            <div class="dash-item-name">Square (ATE)</div>
-            <div class="dash-item-detail">Backend product migration</div>
-          </div>
-          <span class="badge badge-not-started">Not Started</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div style="margin-top:24px;">
-      <a class="back-link" href="https://troy-byte.github.io/agm-mission-control/" target="_blank">
-        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        AGM Mission Control
+    <!-- Quick Actions -->
+    <div class="section-hdr" style="margin-top:36px;">Quick Actions</div>
+    <div class="qlinks">
+      <a class="ql" href="https://docs.google.com/document/d/17aeXJa2MxbbDKhhBGJChFCIZ8l9zK_m0E8L8P078Ws8/edit" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div><h4>Tim & Troy To-Do List</h4><p>Active items & priorities</p></div>
+      </a>
+      <a class="ql" href="https://docs.google.com/document/d/1QbJb3qR_UNqAcMzOwPkchBK9Ft5vGvH2N-A8vSGvFKs/edit" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <div><h4>Meeting Notes</h4><p>Running meeting notes</p></div>
+      </a>
+      <a class="ql" href="https://docs.google.com/spreadsheets/d/1pXGeOdWeHf78yjIjED6etSZCqY7WbAXWLsYtFqYmpB8/edit" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg></div>
+        <div><h4>Priority Dashboard</h4><p>AGM Pro Tools tracker</p></div>
+      </a>
+      <a class="ql" href="https://troy-byte.github.io/agm-mission-control/" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div><h4>AGM Mission Control</h4><p>Main operations hub</p></div>
       </a>
     </div>
+
   </div>
 
-  <!-- ──────── HG PROJECTS ──────── -->
+  <!-- ════ HG PROJECTS ════ -->
   <div id="panel-hg" class="panel">
-    <div class="section-header">Active Projects</div>
-    <div class="card-grid">
-
+    <div class="section-hdr">Active</div>
+    <div class="cards">
       <div class="card">
         <div class="card-top">
           <h3>Costco Workflow</h3>
-          <span class="badge badge-live">Live</span>
+          <span class="b b-live">Live</span>
         </div>
         <p class="desc">Full lead-to-close workflow for Costco events. Swimlane process diagram covering CENTAH, Automation, HG Team, and Member touchpoints.</p>
-        <div class="card-meta">
-          <div class="meta-row">
-            <span class="meta-label">Dashboard</span>
-            <span class="meta-value"><a href="https://troy-byte.github.io/hg-costco-flow/" target="_blank">View Costco Flow</a></span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">Resource</span>
-            <span class="meta-value"><a href="https://docs.google.com/document/d/1Wc3XgFY2CxsS8waLAMNPXsuferDNRyiLmB_3WIkLitI/edit" target="_blank">Costco Resource Doc</a></span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="tag">Costco</span>
-          <span class="tag">CENTAH</span>
-          <span class="tag">Automation</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>SF to AGM Migration Map</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">Visual data migration map showing every Salesforce object and where it lands in AGM. Covers contacts, jobs, payments, change orders, service history, files (176 GB), and DocuSign envelopes. POC complete (Jerry Ellis).</p>
-        <div class="card-meta">
-          <div class="meta-row">
-            <span class="meta-label">Map</span>
-            <span class="meta-value"><a href="sf-agm-migration-map.html" target="_blank">View Migration Map</a></span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="tag">Salesforce</span>
-          <span class="tag">AGM</span>
-          <span class="tag">Migration</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Tim & Troy Active To-Do List</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">Running to-do list for Tim and Troy. Active operational items, priorities, and follow-ups.</p>
-        <div class="card-meta">
-          <div class="meta-row">
-            <span class="meta-label">Doc</span>
-            <span class="meta-value"><a href="https://docs.google.com/document/d/17aeXJa2MxbbDKhhBGJChFCIZ8l9zK_m0E8L8P078Ws8/edit" target="_blank">Open To-Do Doc</a></span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="tag">Operations</span>
-          <span class="tag">To-Do</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Chat Widget / Turf Advisor</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">AI-powered turf advisor chat widget. Currently in testing. Tim and Troy finalizing knowledge base and brand voice.</p>
-        <div class="card-meta">
-          <div class="meta-row">
-            <span class="meta-label">Demo</span>
-            <span class="meta-value"><a href="https://agm-pro--hg-chat-widget-demo.modal.run/" target="_blank">View Demo</a></span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="tag">AI</span>
-          <span class="tag">Chat</span>
-          <span class="tag">Modal</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="section-header">Marketing & Content</div>
-    <div class="card-grid">
-
-      <div class="card">
-        <div class="card-top">
-          <h3>HG Newsletter</h3>
-          <span class="badge badge-recurring">Recurring</span>
-        </div>
-        <p class="desc">Monthly newsletter for Heavenly Greens. HTML generated by Harlan, posted into AGM sub-account.</p>
-        <div class="card-footer">
-          <span class="tag">Newsletter</span>
-          <span class="tag">Monthly</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Atlas Content Production</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">Blog posts, long-form topics, cloud stacks, local short topics, and press releases. 4x per month production cadence.</p>
-        <div class="card-footer">
-          <span class="tag">Content</span>
-          <span class="tag">SEO</span>
-          <span class="tag">Atlas</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>HG Long-Form Video Content</h3>
-          <span class="badge badge-not-started">Not Started</span>
-        </div>
-        <p class="desc">Long-form video production for YouTube, broadcast television, and streaming services. HG brand storytelling and content distribution.</p>
-        <div class="card-footer">
-          <span class="tag">Video</span>
-          <span class="tag">YouTube</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Find Video Producer</h3>
-          <span class="badge badge-not-started">Not Started</span>
-        </div>
-        <p class="desc">Source and hire a video producer for HG content. Upwork and network referrals.</p>
-        <div class="card-footer">
-          <span class="tag">Hiring</span>
-          <span class="tag">Video</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="section-header">Paid Media</div>
-    <div class="card-grid">
-
-      <div class="card">
-        <div class="card-top">
-          <h3>NP Digital Report</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">Performance dashboard and reporting from NP Digital. Monthly SEO and paid media updates.</p>
-        <div class="card-footer">
-          <span class="tag">SEO</span>
-          <span class="tag">Paid Media</span>
-          <span class="tag">NP Digital</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Paid Traffic Review</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">Spot check all live PPC campaigns including Santa Rosa, Manteca, Stockton. Check budgets, confirm spend, review results.</p>
-        <div class="card-footer">
-          <span class="tag">PPC</span>
-          <span class="tag">Google Ads</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Facebook Ads</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">Review all live Facebook campaigns &mdash; content, landing pages, audience targeting, spend.</p>
-        <div class="card-footer">
-          <span class="tag">Facebook</span>
-          <span class="tag">Social Ads</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ──────── ATE PROJECTS ──────── -->
-  <div id="panel-ate" class="panel">
-    <div class="section-header">Artificial Turf Express</div>
-    <div class="card-grid">
-
-      <div class="card">
-        <div class="card-top">
-          <h3>ATE Newsletter</h3>
-          <span class="badge badge-recurring">Recurring</span>
-        </div>
-        <p class="desc">Monthly newsletter for Artificial Turf Express. HTML generated by Harlan, posted into AGM sub-account.</p>
-        <div class="card-footer">
-          <span class="tag">Newsletter</span>
-          <span class="tag">Monthly</span>
-          <span class="tag">ATE</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Square Backend Migration</h3>
-          <span class="badge badge-not-started">Not Started</span>
-        </div>
-        <p class="desc">Complete backend changeover to use Square for products and new photo integration for ATE.</p>
-        <div class="card-footer">
-          <span class="tag">Square</span>
-          <span class="tag">E-Commerce</span>
-          <span class="tag">ATE</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ──────── COSTCO PROGRAM ──────── -->
-  <div id="panel-costco" class="panel">
-    <div class="section-header">Costco Program</div>
-    <div class="card-grid">
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Costco Lead-to-Close Workflow</h3>
-          <span class="badge badge-live">Live</span>
-        </div>
-        <p class="desc">Full swimlane process covering CENTAH intake, automation triggers, HG team assignments, and member touchpoints. Visual flow diagram deployed.</p>
-        <div class="card-meta">
-          <div class="meta-row">
-            <span class="meta-label">Flow</span>
-            <span class="meta-value"><a href="https://troy-byte.github.io/hg-costco-flow/" target="_blank">View Costco Flow</a></span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">Resource</span>
-            <span class="meta-value"><a href="https://docs.google.com/document/d/1Wc3XgFY2CxsS8waLAMNPXsuferDNRyiLmB_3WIkLitI/edit" target="_blank">Costco Resource Doc</a></span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="tag">CENTAH</span>
-          <span class="tag">Automation</span>
-          <span class="tag">Live</span>
+        <a href="https://troy-byte.github.io/hg-costco-flow/" target="_blank">View Costco Flow</a><br>
+        <a href="https://docs.google.com/document/d/1Wc3XgFY2CxsS8waLAMNPXsuferDNRyiLmB_3WIkLitI/edit" target="_blank" style="margin-top:4px;display:inline-block;">Resource Doc</a>
+        <div class="card-tags">
+          <span class="tag">Costco</span><span class="tag">CENTAH</span><span class="tag">Automation</span>
         </div>
       </div>
 
       <div class="card">
         <div class="card-top">
           <h3>CENTAH &rarr; AGM Integration</h3>
-          <span class="badge badge-live">Live</span>
+          <span class="b b-live">Live</span>
         </div>
         <p class="desc">Costco event lead intake through CENTAH, bridged into AGM CRM. ProTools Core ($297/mo). Salesforce bridge operational.</p>
-        <div class="card-footer">
-          <span class="tag">Integration</span>
-          <span class="tag">ProTools</span>
+        <div class="card-tags">
+          <span class="tag">Integration</span><span class="tag">ProTools</span>
         </div>
       </div>
 
       <div class="card">
         <div class="card-top">
-          <h3>SF &rarr; AGM Record Migration</h3>
-          <span class="badge badge-progress">In Progress</span>
+          <h3>SF &rarr; AGM Migration Map</h3>
+          <span class="b b-progress">In Progress</span>
         </div>
-        <p class="desc">32+ custom fields, pipeline opportunities, structured notes, PDF uploads. POC complete with Jerry Ellis. Batch migration not yet planned.</p>
-        <div class="card-meta">
-          <div class="meta-row">
-            <span class="meta-label">Map</span>
-            <span class="meta-value"><a href="sf-agm-migration-map.html" target="_blank">View Migration Map</a></span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="tag">Salesforce</span>
-          <span class="tag">Migration</span>
+        <p class="desc">Visual data migration map. Contacts, jobs, payments, change orders, service history, files (176 GB), DocuSign envelopes. POC complete (Jerry Ellis).</p>
+        <a href="sf-agm-migration-map.html" target="_blank">View Migration Map</a>
+        <div class="card-tags">
+          <span class="tag">Salesforce</span><span class="tag">AGM</span><span class="tag">Migration</span>
         </div>
       </div>
 
+      <div class="card">
+        <div class="card-top">
+          <h3>Chat Widget / Turf Advisor</h3>
+          <span class="b b-progress">In Progress</span>
+        </div>
+        <p class="desc">AI-powered turf advisor chat widget for heavenlygreens.com. In testing. Finalizing knowledge base and brand voice.</p>
+        <a href="https://agm-pro--hg-chat-widget-demo.modal.run/" target="_blank">View Demo</a>
+        <div class="card-tags">
+          <span class="tag">AI</span><span class="tag">Chat</span><span class="tag">Modal</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-top">
+          <h3>Tim & Troy To-Do List</h3>
+          <span class="b b-progress">In Progress</span>
+        </div>
+        <p class="desc">Running to-do list. Active operational items, priorities, and follow-ups.</p>
+        <a href="https://docs.google.com/document/d/17aeXJa2MxbbDKhhBGJChFCIZ8l9zK_m0E8L8P078Ws8/edit" target="_blank">Open Doc</a>
+        <div class="card-tags">
+          <span class="tag">Operations</span><span class="tag">To-Do</span>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- ──────── MARKETING & ADS ──────── -->
-  <div id="panel-marketing" class="panel">
-    <div class="section-header">Paid Media & SEO</div>
-    <div class="card-grid">
-
-      <div class="card">
-        <div class="card-top">
-          <h3>NP Digital Report</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">Performance dashboard and reporting from NP Digital. Monthly SEO and paid media updates for Heavenly Greens.</p>
-        <div class="card-footer">
-          <span class="tag">SEO</span>
-          <span class="tag">NP Digital</span>
-        </div>
-      </div>
-
+    <div class="section-hdr">Marketing & Content</div>
+    <div class="cards">
       <div class="card">
         <div class="card-top">
           <h3>Paid Traffic Review</h3>
-          <span class="badge badge-progress">In Progress</span>
+          <span class="b b-progress">In Progress</span>
         </div>
-        <p class="desc">Spot check all live PPC campaigns: Santa Rosa, Manteca, Stockton. Check budgets, confirm spend, review results.</p>
-        <div class="card-footer">
-          <span class="tag">PPC</span>
-          <span class="tag">Google Ads</span>
+        <p class="desc">Spot check all live PPC campaigns: Santa Rosa, Manteca, Stockton. Budgets, spend, results.</p>
+        <div class="card-tags">
+          <span class="tag">PPC</span><span class="tag">Google Ads</span>
         </div>
       </div>
 
       <div class="card">
         <div class="card-top">
           <h3>Facebook Ads</h3>
-          <span class="badge badge-progress">In Progress</span>
+          <span class="b b-progress">In Progress</span>
         </div>
-        <p class="desc">Review all live Facebook campaigns &mdash; content, landing pages, audience targeting, spend.</p>
-        <div class="card-footer">
-          <span class="tag">Facebook</span>
-          <span class="tag">Social</span>
+        <p class="desc">Review all live campaigns &mdash; content, landing pages, audience targeting, spend.</p>
+        <div class="card-tags">
+          <span class="tag">Facebook</span><span class="tag">Social</span>
         </div>
       </div>
 
-    </div>
-
-    <div class="section-header">Content Production</div>
-    <div class="card-grid">
+      <div class="card">
+        <div class="card-top">
+          <h3>NP Digital Report</h3>
+          <span class="b b-progress">In Progress</span>
+        </div>
+        <p class="desc">Monthly SEO and paid media performance dashboard and reporting.</p>
+        <div class="card-tags">
+          <span class="tag">SEO</span><span class="tag">NP Digital</span>
+        </div>
+      </div>
 
       <div class="card">
         <div class="card-top">
           <h3>Atlas Content Production</h3>
-          <span class="badge badge-progress">In Progress</span>
+          <span class="b b-progress">In Progress</span>
         </div>
-        <p class="desc">Blog posts, long-form topics, cloud stacks, local short topics, and press releases. 4x per month cadence.</p>
-        <div class="card-footer">
-          <span class="tag">Content</span>
-          <span class="tag">SEO</span>
-          <span class="tag">Atlas</span>
+        <p class="desc">Blog posts, long-form topics, cloud stacks, local short topics, press releases. 4x/month.</p>
+        <div class="card-tags">
+          <span class="tag">Content</span><span class="tag">SEO</span><span class="tag">Atlas</span>
         </div>
       </div>
 
       <div class="card">
         <div class="card-top">
           <h3>HG Newsletter</h3>
-          <span class="badge badge-recurring">Recurring</span>
+          <span class="b b-recur">Recurring</span>
         </div>
         <p class="desc">Monthly newsletter for Heavenly Greens. HTML generated by Harlan, posted into AGM sub-account.</p>
-        <div class="card-footer">
-          <span class="tag">Newsletter</span>
-          <span class="tag">Monthly</span>
+        <div class="card-tags">
+          <span class="tag">Newsletter</span><span class="tag">Monthly</span>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-top">
-          <h3>ATE Newsletter</h3>
-          <span class="badge badge-recurring">Recurring</span>
-        </div>
-        <p class="desc">Monthly newsletter for Artificial Turf Express. HTML generated by Harlan, posted into AGM sub-account.</p>
-        <div class="card-footer">
-          <span class="tag">Newsletter</span>
-          <span class="tag">ATE</span>
-        </div>
-      </div>
-
     </div>
-  </div>
 
-  <!-- ──────── CONTENT ──────── -->
-  <div id="panel-content" class="panel">
-    <div class="section-header">Video & Media</div>
-    <div class="card-grid">
-
+    <div class="section-hdr">Not Started</div>
+    <div class="cards">
       <div class="card">
         <div class="card-top">
-          <h3>HG Long-Form Video Content</h3>
-          <span class="badge badge-not-started">Not Started</span>
+          <h3>Long-Form Video Content</h3>
+          <span class="b b-nostart">Not Started</span>
         </div>
-        <p class="desc">Long-form video production for YouTube, broadcast television, and streaming services. HG brand storytelling and content distribution.</p>
-        <div class="card-footer">
-          <span class="tag">Video</span>
-          <span class="tag">YouTube</span>
-          <span class="tag">Broadcast</span>
+        <p class="desc">Video production for YouTube, broadcast, streaming. HG brand storytelling.</p>
+        <div class="card-tags">
+          <span class="tag">Video</span><span class="tag">YouTube</span>
         </div>
       </div>
 
       <div class="card">
         <div class="card-top">
           <h3>Find Video Producer</h3>
-          <span class="badge badge-not-started">Not Started</span>
+          <span class="b b-nostart">Not Started</span>
         </div>
-        <p class="desc">Source and hire a video producer for HG content. Upwork and network referrals.</p>
-        <div class="card-footer">
-          <span class="tag">Hiring</span>
-          <span class="tag">Video</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="section-header">AI & Automation</div>
-    <div class="card-grid">
-
-      <div class="card">
-        <div class="card-top">
-          <h3>Chat Widget / Turf Advisor</h3>
-          <span class="badge badge-progress">In Progress</span>
-        </div>
-        <p class="desc">AI-powered turf advisor chat widget for heavenlygreens.com. Currently in testing. Tim and Troy finalizing knowledge base and brand voice.</p>
-        <div class="card-meta">
-          <div class="meta-row">
-            <span class="meta-label">Demo</span>
-            <span class="meta-value"><a href="https://agm-pro--hg-chat-widget-demo.modal.run/" target="_blank">View Demo</a></span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="tag">AI</span>
-          <span class="tag">Chat Widget</span>
-          <span class="tag">Modal</span>
+        <p class="desc">Source and hire a video producer. Upwork and network referrals.</p>
+        <div class="card-tags">
+          <span class="tag">Hiring</span><span class="tag">Video</span>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- ──────── QUICK LINKS ──────── -->
+  <!-- ════ ATE PROJECTS ════ -->
+  <div id="panel-ate" class="panel">
+    <div class="section-hdr">Artificial Turf Express</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-top">
+          <h3>ATE Newsletter</h3>
+          <span class="b b-recur">Recurring</span>
+        </div>
+        <p class="desc">Monthly newsletter for Artificial Turf Express. HTML generated by Harlan, posted into AGM sub-account.</p>
+        <div class="card-tags">
+          <span class="tag">Newsletter</span><span class="tag">Monthly</span><span class="tag">ATE</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-top">
+          <h3>Square Backend Migration</h3>
+          <span class="b b-nostart">Not Started</span>
+        </div>
+        <p class="desc">Complete backend changeover to Square for products and new photo integration.</p>
+        <div class="card-tags">
+          <span class="tag">Square</span><span class="tag">E-Commerce</span><span class="tag">ATE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ QUICK LINKS ════ -->
   <div id="panel-links" class="panel">
-    <div class="section-header">Heavenly Greens</div>
-    <div class="quick-links-grid">
-
-      <a class="quick-link" href="https://troy-byte.github.io/hg-costco-flow/" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>HG Costco Workflow</h4>
-          <p>Lead-to-close swimlane diagram</p>
-        </div>
+    <div class="section-hdr">Heavenly Greens</div>
+    <div class="qlinks">
+      <a class="ql" href="https://troy-byte.github.io/hg-costco-flow/" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div><h4>Costco Workflow</h4><p>Lead-to-close swimlane diagram</p></div>
       </a>
-
-      <a class="quick-link" href="sf-agm-migration-map.html" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>SF to AGM Migration Map</h4>
-          <p>Visual data migration diagram</p>
-        </div>
+      <a class="ql" href="sf-agm-migration-map.html" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div><h4>SF &rarr; AGM Migration Map</h4><p>Visual data migration diagram</p></div>
       </a>
-
-      <a class="quick-link" href="https://docs.google.com/document/d/17aeXJa2MxbbDKhhBGJChFCIZ8l9zK_m0E8L8P078Ws8/edit" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>Tim & Troy To-Do List</h4>
-          <p>Active operational items & priorities</p>
-        </div>
+      <a class="ql" href="https://docs.google.com/document/d/17aeXJa2MxbbDKhhBGJChFCIZ8l9zK_m0E8L8P078Ws8/edit" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div><h4>Tim & Troy To-Do List</h4><p>Active items & priorities</p></div>
       </a>
-
-      <a class="quick-link" href="https://docs.google.com/document/d/1QbJb3qR_UNqAcMzOwPkchBK9Ft5vGvH2N-A8vSGvFKs/edit" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>Meeting Notes</h4>
-          <p>Running meeting notes doc</p>
-        </div>
+      <a class="ql" href="https://docs.google.com/document/d/1QbJb3qR_UNqAcMzOwPkchBK9Ft5vGvH2N-A8vSGvFKs/edit" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <div><h4>Meeting Notes</h4><p>Running meeting notes doc</p></div>
       </a>
-
-      <a class="quick-link" href="https://docs.google.com/spreadsheets/d/1pXGeOdWeHf78yjIjED6etSZCqY7WbAXWLsYtFqYmpB8/edit" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>Project Priority Dashboard</h4>
-          <p>AGM Pro Tools priority tracker</p>
-        </div>
+      <a class="ql" href="https://docs.google.com/spreadsheets/d/1pXGeOdWeHf78yjIjED6etSZCqY7WbAXWLsYtFqYmpB8/edit" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg></div>
+        <div><h4>Priority Dashboard</h4><p>AGM Pro Tools priority tracker</p></div>
       </a>
-
-      <a class="quick-link" href="https://troy-byte.github.io/hg-calendar/" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>HG Calendar Dashboard</h4>
-          <p>DayBack-style calendar view</p>
-        </div>
+      <a class="ql" href="https://troy-byte.github.io/hg-calendar/" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div><h4>HG Calendar Dashboard</h4><p>DayBack-style calendar view</p></div>
       </a>
-
     </div>
 
-    <div class="section-header" style="margin-top:32px;">AGM & System</div>
-    <div class="quick-links-grid">
-
-      <a class="quick-link" href="https://troy-byte.github.io/agm-mission-control/" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>AGM Mission Control</h4>
-          <p>Main operations dashboard</p>
-        </div>
+    <div class="section-hdr" style="margin-top:28px;">AGM & System</div>
+    <div class="qlinks">
+      <a class="ql" href="https://troy-byte.github.io/agm-mission-control/" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div><h4>AGM Mission Control</h4><p>Main operations dashboard</p></div>
       </a>
-
-      <a class="quick-link" href="https://troy-byte.github.io/master-project-list/" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>AGM Master List</h4>
-          <p>Full project tracking & to-do list</p>
-        </div>
+      <a class="ql" href="https://troy-byte.github.io/master-project-list/" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+        <div><h4>AGM Master List</h4><p>Full project tracking</p></div>
       </a>
-
-      <a class="quick-link" href="https://agm-pro--hg-chat-widget-demo.modal.run/" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>AI Turf Advisor Demo</h4>
-          <p>Chat widget test environment</p>
-        </div>
+      <a class="ql" href="https://agm-pro--hg-chat-widget-demo.modal.run/" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div><h4>AI Turf Advisor Demo</h4><p>Chat widget test environment</p></div>
       </a>
-
-      <a class="quick-link" href="https://troy-byte.github.io/agm-case-study/" target="_blank">
-        <div class="quick-link-icon">
-          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        </div>
-        <div class="quick-link-text">
-          <h4>AGM Case Study (HG)</h4>
-          <p>Published Heavenly Greens case study</p>
-        </div>
+      <a class="ql" href="https://troy-byte.github.io/agm-case-study/" target="_blank">
+        <div class="ql-icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+        <div><h4>AGM Case Study (HG)</h4><p>Published Heavenly Greens case study</p></div>
       </a>
-
     </div>
   </div>
 
 </main>
 
 <script>
-// Sidebar navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -1231,12 +795,9 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
   });
 });
-
-// Sidebar date
-const now = new Date();
-document.getElementById('sidebar-date').textContent = now.toLocaleString('en-US', {
-  weekday: 'short', month: 'short', day: 'numeric',
-  hour: '2-digit', minute: '2-digit'
+const d = new Date();
+document.getElementById('sidebar-date').textContent = d.toLocaleString('en-US', {
+  weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'
 });
 </script>
 
