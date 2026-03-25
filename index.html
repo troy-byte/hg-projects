@@ -1258,8 +1258,9 @@ function renderCostcoDashboard() {
   });
   var turfSel = $('costco-turf-filter');
   turfSel.innerHTML = '<option value="all">All</option>';
-  Object.keys(turfs).sort().forEach(function(t) {
-    turfSel.innerHTML += '<option value="' + t + '">' + t + ' (' + turfs[t] + ')</option>';
+  var turfCounts = _costcoData.turfTypeCounts || {};
+  Object.keys(turfCounts).sort().forEach(function(t) {
+    turfSel.innerHTML += '<option value="' + t + '">' + t + ' (' + turfCounts[t] + ')</option>';
   });
 
   // Store performance
