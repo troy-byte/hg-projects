@@ -1006,21 +1006,26 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
     <div id="costco-loading" style="text-align:center;padding:40px;color:#555">Loading Costco data from Salesforce...</div>
     <div id="costco-content" style="display:none">
 
-      <!-- KPI Row -->
-      <div class="kpi-grid">
+      <!-- Funnel Summary -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr)">
         <div class="kpi"><div class="kpi-label">Total Leads</div><div class="kpi-val" id="kpi-total">-</div></div>
+        <div class="kpi"><div class="kpi-label">Appts Booked</div><div class="kpi-val" id="kpi-booked" style="color:#3b82f6">-</div></div>
+        <div class="kpi"><div class="kpi-label">Appts Ran</div><div class="kpi-val" id="kpi-ran" style="color:#8b5cf6">-</div><div style="font-size:0.5rem;color:#555;margin-top:2px" id="kpi-ran-note"></div></div>
         <div class="kpi"><div class="kpi-label">Sold</div><div class="kpi-val green" id="kpi-sold">-</div></div>
-        <div class="kpi"><div class="kpi-label">Close Rate</div><div class="kpi-val cyan" id="kpi-rate">-</div></div>
-        <div class="kpi"><div class="kpi-label">Revenue</div><div class="kpi-val emerald" id="kpi-revenue">-</div></div>
-      </div>
-      <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-label">Avg Deal</div><div class="kpi-val" id="kpi-avg">-</div></div>
-        <div class="kpi"><div class="kpi-label">Total Sqft</div><div class="kpi-val" id="kpi-sqft">-</div></div>
-        <div class="kpi"><div class="kpi-label">Avg $/sqft</div><div class="kpi-val cyan" id="kpi-ppsf">-</div></div>
-        <div class="kpi"><div class="kpi-label">Pipeline</div><div class="kpi-val yellow" id="kpi-pipeline">-</div></div>
       </div>
 
-      <!-- Status + Turf Type -->
+      <!-- Revenue KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Revenue</div><div class="kpi-val emerald" id="kpi-revenue">-</div></div>
+        <div class="kpi"><div class="kpi-label">Close Rate</div><div class="kpi-val cyan" id="kpi-rate">-</div></div>
+        <div class="kpi"><div class="kpi-label">Total Sqft</div><div class="kpi-val" id="kpi-sqft">-</div></div>
+        <div class="kpi"><div class="kpi-label">Avg $/sqft</div><div class="kpi-val cyan" id="kpi-ppsf">-</div></div>
+      </div>
+
+      <!-- Data gap note -->
+      <div id="data-gap-note" style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:6px;padding:8px 12px;font-size:0.6875rem;color:#60a5fa;margin-bottom:16px"></div>
+
+      <!-- Status + Shaw Products -->
       <div class="two-col">
         <div class="col-card"><h4>Lead Status</h4><div id="status-funnel"></div></div>
         <div class="col-card"><h4>Shaw Turf Products Sold</h4><div id="shaw-products"></div><div id="shaw-total" style="margin-top:8px;padding-top:8px;border-top:1px solid #1a1a1a;font-size:0.6875rem;color:#555;display:flex;justify-content:space-between"></div></div>
@@ -1203,13 +1208,15 @@ function loadCostcoData() {
 function renderCostcoDashboard() {
   var s = _costcoData.summary;
   $('kpi-total').textContent = fmt(s.totalLeads);
+  $('kpi-booked').textContent = fmt(s.appointmentsBooked);
+  $('kpi-ran').textContent = fmt(s.appointmentsRanConfirmed);
+  $('kpi-ran-note').textContent = 'AGM confirmed';
   $('kpi-sold').textContent = fmt(s.sold);
-  $('kpi-rate').textContent = s.soldRate + '%';
   $('kpi-revenue').textContent = fmtD(s.totalRevenue);
-  $('kpi-avg').textContent = fmtD(s.avgDealSize);
+  $('kpi-rate').textContent = s.soldRate + '%';
   $('kpi-sqft').textContent = fmt(s.totalSqft);
   $('kpi-ppsf').textContent = '$' + (s.avgPricePerSqft || 0).toFixed(2);
-  $('kpi-pipeline').textContent = fmtD(s.pipelineValue);
+  $('data-gap-note').innerHTML = '<strong>' + fmt(s.appointmentsRanConfirmed) + '</strong> appointments confirmed ran via AGM. <strong>' + fmt(s.appointmentsUnconfirmed) + '</strong> additional at "Booked" in Salesforce — appointment outcome unconfirmed (pre-pipeline leads).';
 
   // Status funnel
   var statusHtml = '';
