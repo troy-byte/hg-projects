@@ -1358,7 +1358,7 @@ function renderCostcoDashboard() {
   // Store performance
   var stores = _costcoData.storePerformance || {};
   var storeHtml = '';
-  var sortedStores = Object.keys(stores).sort(function(a, b) { return stores[b].revenue - stores[a].revenue; });
+  var sortedStores = Object.keys(stores).sort(function(a, b) { return a.localeCompare(b); });
   sortedStores.forEach(function(name) {
     var st = stores[name];
     var rate = st.leads > 0 ? Math.round(st.sold / st.leads * 100) : 0;
@@ -1380,7 +1380,7 @@ function renderCostcoDashboard() {
     if (!byStore[store]) byStore[store] = [];
     byStore[store].push(l);
   });
-  var storeNames = Object.keys(byStore).sort(function(a, b) { return byStore[b].length - byStore[a].length; });
+  var storeNames = Object.keys(byStore).sort(function(a, b) { return a.localeCompare(b); });
   storeNames.forEach(function(store) {
     var leads = byStore[store];
     var sold = leads.filter(function(l) { return ['Paid in Full','Installed','Installed - Unpaid','Contract Approved','Deposit Sent','Deposit Received','Installation Started','Job Scheduled'].indexOf(l.status) >= 0; }).length;
