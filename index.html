@@ -483,6 +483,107 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
 
 .store-card.open .store-leads-wrap { display: block; }
 
+.store-row-item {
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+
+.store-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.store-row-header:hover { background: #111; }
+
+.store-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.store-row-chevron {
+  color: #555;
+  font-size: 0.75rem;
+  transition: transform 0.15s;
+}
+
+.store-row-item.open .store-row-chevron { transform: rotate(90deg); }
+
+.store-row-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.store-row-count {
+  font-size: 0.6875rem;
+  color: #555;
+}
+
+.store-row-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.75rem;
+}
+
+.store-row-won { color: #22c55e; font-weight: 600; }
+.store-row-rev { color: #fff; font-weight: 600; }
+
+.store-row-leads {
+  display: none;
+  border-top: 1px solid #1a1a1a;
+}
+
+.store-row-item.open .store-row-leads { display: block; }
+
+.store-lead-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid #0f0f0f;
+  transition: background 0.1s;
+}
+
+.store-lead-row:last-child { border-bottom: none; }
+.store-lead-row:hover { background: #111; }
+
+.store-lead-info { flex: 1; min-width: 0; }
+
+.store-lead-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.store-lead-meta {
+  font-size: 0.625rem;
+  color: #555;
+  margin-top: 1px;
+}
+
+.store-lead-stage {
+  font-size: 0.625rem;
+  margin-right: 12px;
+}
+
+.store-lead-amount {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  margin-right: 12px;
+  min-width: 60px;
+  text-align: right;
+}
+
 .store-perf-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -1031,6 +1132,14 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
         <div class="col-card"><h4>Shaw Turf Products Sold</h4><div id="shaw-products"></div><div id="shaw-total" style="margin-top:8px;padding-top:8px;border-top:1px solid #1a1a1a;font-size:0.6875rem;color:#555;display:flex;justify-content:space-between"></div></div>
       </div>
 
+      <!-- Store Performance Grid -->
+      <div class="section-hdr">Store Performance</div>
+      <div class="store-perf-grid" id="store-perf-grid" style="margin-bottom:20px"></div>
+
+      <!-- Expandable Store Rows with Leads -->
+      <div class="section-hdr">Leads by Store <span id="store-lead-count" style="font-weight:400;color:#555"></span></div>
+      <div id="store-rows" style="margin-bottom:20px"></div>
+
       <!-- Filters -->
       <div class="filter-bar">
         <label>Status:</label>
@@ -1039,11 +1148,7 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
         <select id="costco-turf-filter" onchange="filterCostcoLeads()"></select>
       </div>
 
-      <!-- Store Performance -->
-      <div class="section-hdr">Store Performance</div>
-      <div class="store-perf-grid" id="store-perf-grid" style="margin-bottom:20px"></div>
-
-      <!-- Lead Table -->
+      <!-- All Leads Table -->
       <div class="section-hdr">All Leads <span id="lead-count-label" style="font-weight:400;color:#555"></span></div>
       <div style="overflow-x:auto">
         <table class="lead-table" id="costco-lead-table">
@@ -1268,7 +1373,7 @@ function renderCostcoDashboard() {
     var st = stores[name];
     var rate = st.leads > 0 ? Math.round(st.sold / st.leads * 100) : 0;
     var rev = st.revenue >= 1000 ? '$' + Math.round(st.revenue / 1000) + 'k' : '$' + Math.round(st.revenue);
-    storeHtml += '<div class="store-perf"><div class="store-perf-name">' + name + '</div>'
+    storeHtml += '<div class="store-perf"><div class="store-perf-name" style="display:flex;align-items:center;gap:6px"><span style="color:#f87171;font-size:0.625rem">&#9673;</span>' + name + '</div>'
       + '<div class="store-perf-row">'
       + '<div class="store-perf-item"><div class="store-perf-val">' + st.leads + '</div><div class="store-perf-sub">leads</div></div>'
       + '<div class="store-perf-item"><div class="store-perf-val green">' + rate + '%</div><div class="store-perf-sub">close</div></div>'
@@ -1276,6 +1381,73 @@ function renderCostcoDashboard() {
       + '</div></div>';
   });
   $('store-perf-grid').innerHTML = storeHtml;
+
+  // Expandable store rows with leads
+  var storeRowsHtml = '';
+  var byStore = {};
+  _costcoLeads.forEach(function(l) {
+    var store = l.costcoStore || 'Unknown';
+    if (!byStore[store]) byStore[store] = [];
+    byStore[store].push(l);
+  });
+  var storeNames = Object.keys(byStore).sort(function(a, b) { return byStore[b].length - byStore[a].length; });
+  storeNames.forEach(function(store) {
+    var leads = byStore[store];
+    var sold = leads.filter(function(l) { return ['Paid in Full','Installed','Installed - Unpaid','Contract Approved','Deposit Sent','Deposit Received','Installation Started','Job Scheduled'].indexOf(l.status) >= 0; }).length;
+    var rev = 0;
+    leads.forEach(function(l) { if (l.totalPrice) rev += l.totalPrice; });
+    var revStr = rev > 0 ? fmtD(rev) : '$0';
+
+    storeRowsHtml += '<div class="store-row-item" id="store-' + store.replace(/[^a-zA-Z0-9]/g, '') + '">';
+    storeRowsHtml += '<div class="store-row-header" onclick="this.parentElement.classList.toggle(\'open\')">';
+    storeRowsHtml += '<div class="store-row-left">';
+    storeRowsHtml += '<span class="store-row-chevron">&#9654;</span>';
+    storeRowsHtml += '<span style="color:#f87171;font-size:0.75rem">&#9673;</span>';
+    storeRowsHtml += '<span class="store-row-name">' + store + '</span>';
+    storeRowsHtml += '<span class="store-row-count">' + leads.length + ' leads</span>';
+    storeRowsHtml += '</div>';
+    storeRowsHtml += '<div class="store-row-right">';
+    storeRowsHtml += '<span class="store-row-won">' + sold + ' won</span>';
+    storeRowsHtml += '<span class="store-row-rev">' + revStr + '</span>';
+    storeRowsHtml += '</div></div>';
+
+    // Lead rows inside
+    storeRowsHtml += '<div class="store-row-leads">';
+    leads.forEach(function(l) {
+      var pill = (STATUS_COLORS[l.status] || {}).pill || 'new';
+      var stageColor = '#666';
+      if (l.opportunityStage) {
+        if (l.opportunityStage.indexOf('Completed') >= 0 || l.opportunityStage.indexOf('Closed Won') >= 0) stageColor = '#22c55e';
+        else if (l.opportunityStage.indexOf('Scheduled') >= 0) stageColor = '#22d3ee';
+        else if (l.opportunityStage.indexOf('Unpaid') >= 0) stageColor = '#f97316';
+      }
+      var amount = l.totalPrice ? fmtD(l.totalPrice) : '';
+      var sfLink = l.sfUrl ? '<a class="lead-link sf" href="' + l.sfUrl + '" target="_blank">SF</a>' : '';
+      var agmLink = l.agmUrl
+        ? '<a class="lead-link agm" href="' + l.agmUrl + '" target="_blank">AGM</a>'
+        : '<a class="lead-link agm" href="' + AGM_CONTACTS_URL + '" target="_blank">AGM</a>';
+
+      storeRowsHtml += '<div class="store-lead-row">';
+      storeRowsHtml += '<div class="store-lead-info">';
+      storeRowsHtml += '<div style="display:flex;align-items:center;gap:6px">';
+      storeRowsHtml += '<span class="store-lead-name">' + l.firstName + ' ' + l.lastName + '</span>';
+      storeRowsHtml += '<span class="status-pill ' + pill + '">' + l.status + '</span>';
+      storeRowsHtml += '</div>';
+      storeRowsHtml += '<div class="store-lead-meta">' + (l.city || '') + ' &middot; <span class="turf">' + l.turfType + '</span></div>';
+      storeRowsHtml += '</div>';
+      if (l.opportunityStage) {
+        storeRowsHtml += '<span class="store-lead-stage" style="color:' + stageColor + '">' + l.opportunityStage + '</span>';
+      }
+      if (amount) {
+        storeRowsHtml += '<span class="store-lead-amount">' + amount + '</span>';
+      }
+      storeRowsHtml += '<div class="lead-links">' + sfLink + agmLink + '</div>';
+      storeRowsHtml += '</div>';
+    });
+    storeRowsHtml += '</div></div>';
+  });
+  $('store-rows').innerHTML = storeRowsHtml;
+  $('store-lead-count').textContent = '(' + storeNames.length + ' stores)';
 
   // Render leads
   renderLeadTable(_costcoLeads);
