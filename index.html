@@ -1333,15 +1333,17 @@ function renderCostcoDashboard() {
     if (d === todayStr || d === tomorrowStr) leadsToday++;
     if (d >= weekStr) leadsWeek++;
     if (d.slice(0, 7) === monthStr) leadsMonth++;
-    // Appointment counts (same time windows, filtered by status)
-    var st = l.status || '';
-    if (st in apptSetStatuses) {
-      if (d === todayStr || d === tomorrowStr) apptsToday++;
-      if (d >= weekStr) apptsWeek++;
-      if (d.slice(0, 7) === monthStr) apptsMonth++;
+    // Appointment counts — use actual appointment date from SF
+    var apptDate = l.appointmentDate || '';
+    if (apptDate) {
+      if (apptDate === todayStr || apptDate === tomorrowStr) apptsToday++;
+      if (apptDate >= weekStr) apptsWeek++;
+      if (apptDate.slice(0, 7) === monthStr) apptsMonth++;
     }
-    if (st in apptRanStatuses) {
-      if (d.slice(0, 7) === monthStr) apptsRanMonth++;
+    // Appointments ran: has an appointment date in the past AND status shows it ran
+    var st = l.status || '';
+    if (apptDate && apptDate <= tomorrowStr && (st in apptRanStatuses)) {
+      if (apptDate.slice(0, 7) === monthStr) apptsRanMonth++;
     }
   });
   $('kpi-leads-today').textContent = fmt(leadsToday);
