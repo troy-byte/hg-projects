@@ -1091,11 +1091,19 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
         <div class="kpi"><div class="kpi-label">Leads This Month</div><div class="kpi-val emerald" id="kpi-leads-month">-</div></div>
       </div>
 
-      <!-- Funnel Summary -->
+      <!-- Appointment Activity (Today / This Week / This Month / Ran This Month) -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="kpi"><div class="kpi-label">Appts Set Today</div><div class="kpi-val" id="kpi-appts-today" style="color:#a78bfa">-</div></div>
+        <div class="kpi"><div class="kpi-label">Appts Set This Week</div><div class="kpi-val" id="kpi-appts-week" style="color:#8b5cf6">-</div></div>
+        <div class="kpi"><div class="kpi-label">Appts Set This Month</div><div class="kpi-val" id="kpi-appts-month" style="color:#7c3aed">-</div></div>
+        <div class="kpi"><div class="kpi-label">Appts Ran This Month</div><div class="kpi-val" id="kpi-appts-ran-month" style="color:#f59e0b">-</div></div>
+      </div>
+
+      <!-- Funnel Totals -->
       <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr)">
         <div class="kpi"><div class="kpi-label">Total Leads</div><div class="kpi-val" id="kpi-total">-</div></div>
-        <div class="kpi"><div class="kpi-label">Appts Booked</div><div class="kpi-val" id="kpi-booked" style="color:#3b82f6">-</div></div>
-        <div class="kpi"><div class="kpi-label">Appts Ran</div><div class="kpi-val" id="kpi-ran" style="color:#8b5cf6">-</div><div style="font-size:0.5rem;color:#555;margin-top:2px" id="kpi-ran-note"></div></div>
+        <div class="kpi"><div class="kpi-label">Total Appts Booked</div><div class="kpi-val" id="kpi-booked" style="color:#3b82f6">-</div></div>
+        <div class="kpi"><div class="kpi-label">Total Appts Ran</div><div class="kpi-val" id="kpi-ran" style="color:#8b5cf6">-</div><div style="font-size:0.5rem;color:#555;margin-top:2px" id="kpi-ran-note"></div></div>
         <div class="kpi"><div class="kpi-label">Sold</div><div class="kpi-val green" id="kpi-sold">-</div></div>
       </div>
 
@@ -1299,26 +1307,50 @@ function loadCostcoData() {
 function renderCostcoDashboard() {
   var s = _costcoData.summary;
 
-  // Lead activity: today / this week / this month
+  // Time boundaries (PT-aware: SF dates are UTC, so include today+1 for "today" in PT)
   var now = new Date();
-  var todayStr = now.toISOString().slice(0, 10);
+  // Use PT offset: build today string from local time, not UTC
+  var todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  var tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+  var tomorrowStr = tomorrow.getFullYear() + '-' + String(tomorrow.getMonth()+1).padStart(2,'0') + '-' + String(tomorrow.getDate()).padStart(2,'0');
   var dayOfWeek = now.getDay();
   var mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   var weekStart = new Date(now);
   weekStart.setDate(now.getDate() - mondayOffset);
-  var weekStr = weekStart.toISOString().slice(0, 10);
-  var monthStr = now.toISOString().slice(0, 7); // YYYY-MM
+  var weekStr = weekStart.getFullYear() + '-' + String(weekStart.getMonth()+1).padStart(2,'0') + '-' + String(weekStart.getDate()).padStart(2,'0');
+  var monthStr = todayStr.slice(0, 7); // YYYY-MM
+
+  // Statuses that mean appointment was set (booked or beyond)
+  var apptSetStatuses = {'Appointment Booked':1, 'Appointment Ran':1, 'Proposal Out':1, 'Contract Approved':1, 'Deposit Sent':1, 'Deposit Received':1, 'Installation Started':1, 'Installed':1, 'Installed - Unpaid':1, 'Paid in Full':1, 'Job Scheduled':1, 'No Show':1};
+  // Statuses that mean appointment actually ran
+  var apptRanStatuses = {'Appointment Ran':1, 'Proposal Out':1, 'Contract Approved':1, 'Deposit Sent':1, 'Deposit Received':1, 'Installation Started':1, 'Installed':1, 'Installed - Unpaid':1, 'Paid in Full':1, 'Job Scheduled':1};
 
   var leadsToday = 0, leadsWeek = 0, leadsMonth = 0;
+  var apptsToday = 0, apptsWeek = 0, apptsMonth = 0, apptsRanMonth = 0;
   (_costcoLeads || []).forEach(function(l) {
     var d = l.createdDate || '';
-    if (d === todayStr) leadsToday++;
+    // Lead counts (include tomorrow's UTC date as "today" in PT)
+    if (d === todayStr || d === tomorrowStr) leadsToday++;
     if (d >= weekStr) leadsWeek++;
     if (d.slice(0, 7) === monthStr) leadsMonth++;
+    // Appointment counts (same time windows, filtered by status)
+    var st = l.status || '';
+    if (st in apptSetStatuses) {
+      if (d === todayStr || d === tomorrowStr) apptsToday++;
+      if (d >= weekStr) apptsWeek++;
+      if (d.slice(0, 7) === monthStr) apptsMonth++;
+    }
+    if (st in apptRanStatuses) {
+      if (d.slice(0, 7) === monthStr) apptsRanMonth++;
+    }
   });
   $('kpi-leads-today').textContent = fmt(leadsToday);
   $('kpi-leads-week').textContent = fmt(leadsWeek);
   $('kpi-leads-month').textContent = fmt(leadsMonth);
+  $('kpi-appts-today').textContent = fmt(apptsToday);
+  $('kpi-appts-week').textContent = fmt(apptsWeek);
+  $('kpi-appts-month').textContent = fmt(apptsMonth);
+  $('kpi-appts-ran-month').textContent = fmt(apptsRanMonth);
 
   // Data freshness
   if (_costcoData.generated) {
