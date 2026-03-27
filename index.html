@@ -1340,9 +1340,8 @@ function renderCostcoDashboard() {
       if (apptDate >= weekStr) apptsWeek++;
       if (apptDate.slice(0, 7) === monthStr) apptsMonth++;
     }
-    // Appointments ran: has an appointment date in the past AND status shows it ran
-    var st = l.status || '';
-    if (apptDate && apptDate <= tomorrowStr && (st in apptRanStatuses)) {
+    // Appointments ran: appointment date is today or in the past (Anthony ran it)
+    if (apptDate && apptDate <= todayStr) {
       if (apptDate.slice(0, 7) === monthStr) apptsRanMonth++;
     }
   });
