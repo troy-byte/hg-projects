@@ -1296,6 +1296,29 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
         <div id="hg-data-freshness" style="font-size:0.65rem;color:#555"></div>
       </div>
 
+      <!-- Lead Activity (Today / This Week / This Month) -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr)">
+        <div class="kpi"><div class="kpi-label">Leads Today</div><div class="kpi-val cyan" id="hg-kpi-leads-today">-</div></div>
+        <div class="kpi"><div class="kpi-label">Leads This Week</div><div class="kpi-val" id="hg-kpi-leads-week" style="color:#3b82f6">-</div></div>
+        <div class="kpi"><div class="kpi-label">Leads This Month</div><div class="kpi-val emerald" id="hg-kpi-leads-month">-</div></div>
+      </div>
+
+      <!-- Appointment Activity -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="kpi"><div class="kpi-label">Appts Today</div><div class="kpi-val" id="hg-kpi-appts-today" style="color:#a78bfa">-</div></div>
+        <div class="kpi"><div class="kpi-label">Appts This Week</div><div class="kpi-val" id="hg-kpi-appts-week" style="color:#8b5cf6">-</div></div>
+        <div class="kpi"><div class="kpi-label">Appts This Month</div><div class="kpi-val" id="hg-kpi-appts-month" style="color:#7c3aed">-</div></div>
+        <div class="kpi"><div class="kpi-label">Appts Ran This Month</div><div class="kpi-val" id="hg-kpi-appts-ran-month" style="color:#f59e0b">-</div></div>
+      </div>
+
+      <!-- Funnel Totals -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="kpi"><div class="kpi-label">Total Leads</div><div class="kpi-val" id="hg-kpi-leads">-</div></div>
+        <div class="kpi"><div class="kpi-label">Total Appts Booked</div><div class="kpi-val" id="hg-kpi-appts-booked" style="color:#3b82f6">-</div></div>
+        <div class="kpi"><div class="kpi-label">Total Appts Ran</div><div class="kpi-val" id="hg-kpi-appts-ran" style="color:#8b5cf6">-</div></div>
+        <div class="kpi"><div class="kpi-label">Sold</div><div class="kpi-val green" id="hg-kpi-sold">-</div></div>
+      </div>
+
       <!-- Top KPIs -->
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-label">Total Opps</div><div class="kpi-val" id="hg-kpi-total-opps">-</div></div>
@@ -1312,12 +1335,6 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
         <div class="kpi"><div class="kpi-label">Pipeline</div><div class="kpi-val" id="hg-kpi-pipeline" style="color:#eab308">-</div></div>
       </div>
 
-      <!-- Lead KPIs -->
-      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr)">
-        <div class="kpi"><div class="kpi-label">Total Leads</div><div class="kpi-val" id="hg-kpi-leads">-</div></div>
-        <div class="kpi"><div class="kpi-label">Converted</div><div class="kpi-val green" id="hg-kpi-converted">-</div></div>
-        <div class="kpi"><div class="kpi-label">Total Sqft</div><div class="kpi-val cyan" id="hg-kpi-sqft">-</div></div>
-      </div>
 
       <!-- Pipeline Funnel + Lead Sources -->
       <div class="two-col">
@@ -1535,7 +1552,8 @@ var _hgSalesRaw = null;       // Full dataset from JSON
 var _hgSalesData = null;      // Computed stats for current year
 var _hgSalesOpps = [];        // Filtered opps for current year
 var _hgSalesAllOpps = [];     // All opps from JSON
-var _hgSalesAllLeadStats = null;
+var _hgSalesAllLeads = [];    // All lead records from JSON
+var _hgSalesYearLeads = [];   // Filtered leads for current year
 var _hgActiveYear = '2026';
 var _hgSortCol = '';
 var _hgSortDir = 'asc';
@@ -1574,7 +1592,7 @@ function loadHGSalesData() {
       window._hgSalesLoaded = true;
       _hgSalesRaw = data;
       _hgSalesAllOpps = data.opportunities || [];
-      _hgSalesAllLeadStats = data.leadStatusCounts || {};
+      _hgSalesAllLeads = data.leads || [];
 
       // Show freshness
       if (data.generated) {
@@ -1607,17 +1625,21 @@ function switchHGYear(year) {
   _hgSortDir = 'asc';
   document.querySelectorAll('#hg-opp-table .sort-arrow').forEach(function(el) { el.className = 'sort-arrow'; });
 
-  // Filter opps by year
+  // Filter opps and leads by year
   _hgSalesOpps = _hgSalesAllOpps.filter(function(o) {
     return (o.createdDate || '').substring(0, 4) === year;
   });
+  _hgSalesYearLeads = _hgSalesAllLeads.filter(function(l) {
+    return (l.createdDate || '').substring(0, 4) === year;
+  });
 
-  // Recompute stats from filtered opps
+  // Recompute stats from filtered data
   computeAndRenderHGYear();
 }
 
 function computeAndRenderHGYear() {
   var opps = _hgSalesOpps;
+  var leads = _hgSalesYearLeads;
   var totalOpps = opps.length;
   var totalRevenue = 0, totalSqft = 0, wonCount = 0, lostCount = 0, openCount = 0, pipelineValue = 0;
   var stageCounts = {};
@@ -1659,6 +1681,65 @@ function computeAndRenderHGYear() {
   var closeRate = decided > 0 ? (wonCount / decided * 100).toFixed(1) : '0.0';
   var avgDeal = wonCount > 0 ? Math.round(totalRevenue / wonCount) : 0;
 
+  // ── Activity KPIs (Leads Today/Week/Month, Appts) ──
+  var now = new Date();
+  var todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  var tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+  var tomorrowStr = tomorrow.getFullYear() + '-' + String(tomorrow.getMonth()+1).padStart(2,'0') + '-' + String(tomorrow.getDate()).padStart(2,'0');
+  var dow = now.getDay();
+  var mondayOff = dow === 0 ? 6 : dow - 1;
+  var weekStart = new Date(now); weekStart.setDate(now.getDate() - mondayOff);
+  var weekStr = weekStart.getFullYear() + '-' + String(weekStart.getMonth()+1).padStart(2,'0') + '-' + String(weekStart.getDate()).padStart(2,'0');
+  var monthStr = todayStr.slice(0, 7);
+
+  var leadsToday = 0, leadsWeek = 0, leadsMonth = 0;
+  leads.forEach(function(l) {
+    var d = l.createdDate || '';
+    if (d === todayStr || d === tomorrowStr) leadsToday++;
+    if (d >= weekStr) leadsWeek++;
+    if (d.slice(0, 7) === monthStr) leadsMonth++;
+  });
+
+  // Appointment activity from opps (using appointmentDate)
+  var APPT_SET_STAGES = {'1st Presentation Set':1, 'Not Sold - Needs Follow Up':1,
+    'Sales Closed Won - Needs Approval':1, 'Sales Closed Won - Approved':1,
+    'Job Scheduled':1, 'Complete - Unpaid':1, 'Completed - Paid':1,
+    'Completed - Paid/Retention Owed':1, 'Completed- Paid':1,
+    'Follow Up Appointment Set':1, 'No Show':1, 'Canceled Appointment':1,
+    'Turf Replacement - Completed':1};
+  var APPT_RAN_STAGES = {'Not Sold - Needs Follow Up':1,
+    'Sales Closed Won - Needs Approval':1, 'Sales Closed Won - Approved':1,
+    'Job Scheduled':1, 'Complete - Unpaid':1, 'Completed - Paid':1,
+    'Completed - Paid/Retention Owed':1, 'Completed- Paid':1,
+    'Follow Up Appointment Set':1, 'Turf Replacement - Completed':1};
+
+  var apptsToday = 0, apptsWeek = 0, apptsMonth = 0, apptsRanMonth = 0;
+  var totalApptsBooked = 0, totalApptsRan = 0;
+
+  opps.forEach(function(o) {
+    var apptDate = o.appointmentDate || '';
+    if (APPT_SET_STAGES[o.stage]) totalApptsBooked++;
+    if (APPT_RAN_STAGES[o.stage]) totalApptsRan++;
+    if (apptDate) {
+      if (apptDate === todayStr || apptDate === tomorrowStr) apptsToday++;
+      if (apptDate >= weekStr) apptsWeek++;
+      if (apptDate.slice(0, 7) === monthStr) apptsMonth++;
+      if (apptDate < todayStr && apptDate.slice(0, 7) === monthStr) apptsRanMonth++;
+    }
+  });
+
+  $('hg-kpi-leads-today').textContent = fmt(leadsToday);
+  $('hg-kpi-leads-week').textContent = fmt(leadsWeek);
+  $('hg-kpi-leads-month').textContent = fmt(leadsMonth);
+  $('hg-kpi-appts-today').textContent = fmt(apptsToday);
+  $('hg-kpi-appts-week').textContent = fmt(apptsWeek);
+  $('hg-kpi-appts-month').textContent = fmt(apptsMonth);
+  $('hg-kpi-appts-ran-month').textContent = fmt(apptsRanMonth);
+  $('hg-kpi-leads').textContent = fmt(leads.length);
+  $('hg-kpi-appts-booked').textContent = fmt(totalApptsBooked);
+  $('hg-kpi-appts-ran').textContent = fmt(totalApptsRan);
+  $('hg-kpi-sold').textContent = fmt(wonCount);
+
   // KPIs
   $('hg-kpi-total-opps').textContent = fmt(totalOpps);
   $('hg-kpi-won').textContent = fmt(wonCount);
@@ -1669,11 +1750,6 @@ function computeAndRenderHGYear() {
   $('hg-kpi-avg-deal').textContent = fmtD(avgDeal);
   $('hg-kpi-pipeline').textContent = fmtD(pipelineValue);
 
-  // Lead stats — from raw summary (not year-filtered, but show total context)
-  var s = _hgSalesRaw.summary || {};
-  $('hg-kpi-leads').textContent = fmt(s.totalLeads || 0);
-  $('hg-kpi-converted').textContent = fmt(s.convertedLeads || 0);
-  $('hg-kpi-sqft').textContent = fmt(Math.round(totalSqft));
 
   // Pipeline funnel — ordered
   var STAGE_ORDER = [
