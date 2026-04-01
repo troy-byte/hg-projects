@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Heavenly Greens Dashboard</title>
+<title>HG Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -204,6 +204,81 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
 .b-progress { color: #eab308; background: rgba(234,179,8,0.12); }
 .b-nostart  { color: #555;    background: rgba(85,85,85,0.1); }
 .b-recur    { color: #3b82f6; background: rgba(59,130,246,0.12); }
+.b-now      { color: #ef4444; background: rgba(239,68,68,0.12); }
+.b-next     { color: #eab308; background: rgba(234,179,8,0.12); }
+.b-queued   { color: #555;    background: rgba(85,85,85,0.1); }
+.b-waiting  { color: #f97316; background: rgba(249,115,22,0.12); }
+.b-done     { color: #22c55e; background: rgba(34,197,94,0.08); }
+.b-blocked  { color: #ef4444; background: rgba(239,68,68,0.12); }
+.b-hg       { color: #22c55e; background: rgba(34,197,94,0.08); }
+.b-ate      { color: #95C83C; background: rgba(149,200,60,0.12); }
+.b-both     { color: #3b82f6; background: rgba(59,130,246,0.08); }
+
+/* ── TRUE NORTH TASKS ── */
+.task {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #111;
+}
+.task:last-child { border-bottom: none; }
+.task-check {
+  flex-shrink: 0;
+  width: 16px; height: 16px;
+  border: 1.5px solid #333;
+  border-radius: 4px;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.task.done .task-check {
+  border-color: #22c55e;
+  background: rgba(34,197,94,0.15);
+}
+.task.done .task-check::after {
+  content: '\2713';
+  font-size: 10px;
+  color: #22c55e;
+  font-weight: 700;
+}
+.task-info { flex: 1; min-width: 0; }
+.task-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.3;
+}
+.task.done .task-name { color: #444; text-decoration: line-through; }
+.task-desc {
+  font-size: 0.75rem;
+  color: #555;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.task.done .task-desc { color: #333; }
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.task-meta a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+.task-meta a:hover { text-decoration: underline; }
+.section-hdr .count {
+  color: #333;
+  font-weight: 500;
+  margin-left: 6px;
+}
+.stat-val.r { color: #ef4444; }
+.stat-val.y { color: #eab308; }
+.stat-val.w { color: #fff; }
 
 /* ── CARDS (detail pages) ── */
 .card {
@@ -736,10 +811,11 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
 <body>
 
 <div class="topbar">
-  <h1><span style="color:#22c55e">Heavenly Greens</span> Dashboard</h1>
+  <h1><span style="color:#22c55e">HG</span> Mission Control</h1>
   <p>Heavenly Greens &bull; Artificial Turf Express</p>
   <div class="tabs">
-    <button class="tab active" data-panel="dashboard">Dashboard</button>
+    <button class="tab active" data-panel="true-north">True North</button>
+    <button class="tab" data-panel="dashboard">Dashboard</button>
     <button class="tab" data-panel="hg">HG Projects</button>
     <button class="tab" data-panel="ate">ATE Projects</button>
     <button class="tab" data-panel="costco">Costco</button>
@@ -750,8 +826,247 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
 
 <div class="wrap">
 
+  <!-- ════ TRUE NORTH ════ -->
+  <div id="panel-true-north" class="panel active">
+
+    <div class="stats" style="grid-template-columns: repeat(5, 1fr);">
+      <div class="stat"><div class="stat-label">Now</div><div class="stat-val r">7</div></div>
+      <div class="stat"><div class="stat-label">Next</div><div class="stat-val y">6</div></div>
+      <div class="stat"><div class="stat-label">Queued</div><div class="stat-val w">5</div></div>
+      <div class="stat"><div class="stat-label">Waiting</div><div class="stat-val" style="color:#f97316;">2</div></div>
+      <div class="stat"><div class="stat-label">Recurring</div><div class="stat-val b">4</div></div>
+    </div>
+
+    <div class="section-hdr">Now — This Week<span class="count">(7)</span></div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Costco Lead Outreach Protocols (Pillar 5)</div>
+        <div class="task-desc">Speed-to-lead strategy, call scripts, business hours routing, lead qualification. Two of six pillars remain unbuilt — this one defines how leads get worked.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-now">Now</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">SMS/Email/Voice Follow-Up Sequences (Pillar 6)</div>
+        <div class="task-desc">Multi-channel automated follow-up for Costco leads in AGM. Synthflow vs AGM Voice AI decision. TCPA compliance. Build in AGM workflow builder.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-now">Now</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Deactivate Broadly Workflow Rule in SF</div>
+        <div class="task-desc">SF Setup → Workflow Rules → "Broadly" → Deactivate. Zapier was contaminating AGM contact names. 5-minute fix.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-now">Now</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">AGM Opportunity Value Backfill</div>
+        <div class="task-desc">AGM pipeline opportunities show $0 because Zapier never synced monetary values. Backfill from SF contract amounts.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-now">Now</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Turf Advisor Chat Widget — Finalize & Deploy</div>
+        <div class="task-desc">Polly chat widget in testing. Tim & Troy finalizing. 13 products configured. AGM workflow triggers wired. Deploy to heavenlygreens.com.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-now">Now</span> <a href="https://AGM-Pro--turf-advisor-fastapi-app.modal.run/demo/heavenly-greens" target="_blank">Demo →</a></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Paid Traffic Review — PPC Spot Check</div>
+        <div class="task-desc">Review all live PPC campaigns: Santa Rosa, Manteca, Stockton. Check budgets, confirm spend, review results.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-now">Now</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Facebook Ads — Campaign Review</div>
+        <div class="task-desc">Review all live Facebook campaigns — content, landing pages, audience targeting, spend.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-now">Now</span></div>
+      </div>
+    </div>
+
+    <div class="section-hdr">Next Up<span class="count">(6)</span></div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">HG Calendar Dashboard — Modal Live Refresh</div>
+        <div class="task-desc">Calendar is live but static JSON. Needs Modal endpoint for auto-refresh and date navigation.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-next">Next</span> <a href="https://troy-byte.github.io/hg-calendar/" target="_blank">Live →</a></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">SF-to-AGM Migration — Batch Strategy</div>
+        <div class="task-desc">POC complete (Jerry Ellis). Define batch scope: all customers vs active only, file migration cutoff (176 GB), DocuSign strategy.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-next">Next</span> <a href="sf-agm-migration-map.html" target="_blank">Map →</a></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Document Signature Watch Dog</div>
+        <div class="task-desc">Automated reminder loop for unsigned documents. Three independent loops, timed escalation. Critical for revenue leakage.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-next">Next</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">NP Digital Report — Monthly Review</div>
+        <div class="task-desc">Performance dashboard and reporting from NP Digital. Monthly SEO and paid media updates.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-next">Next</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">HubSpot Package Investigation</div>
+        <div class="task-desc">Legacy HubSpot package in SF org. Is it still needed? Remove to clean up the org.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-next">Next</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Long-Form Video Content Strategy</div>
+        <div class="task-desc">YouTube, broadcast television, streaming. HG brand storytelling. Needs video producer first.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-next">Next</span></div>
+      </div>
+    </div>
+
+    <div class="section-hdr">Queued — On the Radar<span class="count">(5)</span></div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">HG Calendar → AGM Data Source Swap</div>
+        <div class="task-desc">Calendar currently reads from SF Events. Phase 2: swap to AGM calendar data.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-queued">Queued</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">ATE Square Backend Migration</div>
+        <div class="task-desc">Complete backend changeover to use Square for products and new photo integration.</div>
+        <div class="task-meta"><span class="b b-ate">ATE</span> <span class="b b-queued">Queued</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">ATE Newsletter Template</div>
+        <div class="task-desc">Monthly newsletter for Artificial Turf Express. Same pipeline as HG newsletter.</div>
+        <div class="task-meta"><span class="b b-ate">ATE</span> <span class="b b-queued">Queued</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Find Video Producer</div>
+        <div class="task-desc">Source and hire a video producer for HG content. Upwork and network referrals.</div>
+        <div class="task-meta"><span class="b b-both">Both</span> <span class="b b-queued">Queued</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Costco-Shaw Vendor Ecosystem Play</div>
+        <div class="task-desc">AGM Pro Tools as turnkey platform for Shaw's entire vendor ecosystem. HG is the proof of concept.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-queued">Queued</span></div>
+      </div>
+    </div>
+
+    <div class="section-hdr">Waiting On Others<span class="count">(2)</span></div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Andrew — Review Workflow SMS/Email Copy</div>
+        <div class="task-desc">Needs to finalize SMS + email copy for the "Completed - Paid" review request. Required before review automation goes live.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-waiting">Waiting</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Tim — Chat Widget Final Approval</div>
+        <div class="task-desc">Polly turf advisor widget in testing. Tim reviewing product catalog accuracy and sales flow parameters.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-waiting">Waiting</span></div>
+      </div>
+    </div>
+
+    <div class="section-hdr">Recurring<span class="count">(4)</span></div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">HG Newsletter</div>
+        <div class="task-desc">Monthly newsletter for Heavenly Greens. HTML generated by Harlan, distributed via AGM Conversations API.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-recur">Monthly</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Atlas Content Production</div>
+        <div class="task-desc">Blog posts, long-form topics, cloud stacks, local short topics, press releases. 4x per month cadence.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-recur">4x/month</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Zero Inbox Briefing (Tim)</div>
+        <div class="task-desc">AI-powered email briefing with one-click archive. Live for Tim. Daily automated run.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-recur">Daily</span></div>
+      </div>
+    </div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">Costco Lead Intake Polling</div>
+        <div class="task-desc">M365 Graph API polls costco@heavenlygreens.com. Parses CENTAH emails, creates contacts in AGM + SF.</div>
+        <div class="task-meta"><span class="b b-hg">HG</span> <span class="b b-recur">Every 5m</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-true-north -->
+
   <!-- ════ DASHBOARD ════ -->
-  <div id="panel-dashboard" class="panel active">
+  <div id="panel-dashboard" class="panel">
 
     <div class="stats">
       <div class="stat">
