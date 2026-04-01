@@ -378,6 +378,75 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
 .ql h4 { font-size: 0.8125rem; font-weight: 600; color: #fff; }
 .ql p { font-size: 0.6875rem; color: #444; margin-top: 1px; }
 
+/* ── HG SALES DASHBOARD ── */
+.hg-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.hg-bar-label {
+  font-size: 0.6875rem;
+  color: #888;
+  width: 110px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hg-bar-bg {
+  flex: 1;
+  height: 16px;
+  background: #111;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hg-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.hg-bar-val {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #fff;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.hg-month-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.hg-month-label {
+  font-size: 0.625rem;
+  color: #666;
+  width: 52px;
+  flex-shrink: 0;
+}
+.hg-month-bar {
+  flex: 1;
+  height: 14px;
+  background: #111;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hg-month-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: #10b981;
+}
+.hg-month-val {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: #10b981;
+  width: 60px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
 /* ── COSTCO DASHBOARD ── */
 .kpi-grid {
   display: grid;
@@ -816,6 +885,7 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
   <div class="tabs">
     <button class="tab active" data-panel="true-north">True North</button>
     <button class="tab" data-panel="overview">Overview</button>
+    <button class="tab" data-panel="hg-sales">HG Sales</button>
     <button class="tab" data-panel="costco">Costco</button>
     <button class="tab" data-panel="hg-calendar">Calendar</button>
   </div>
@@ -1211,6 +1281,82 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
   </div>
 
   <!-- ════ COSTCO ════ -->
+  <!-- ════ HG SALES ════ -->
+  <div id="panel-hg-sales" class="panel">
+    <div id="hg-sales-loading" style="text-align:center;padding:40px;color:#555">Loading HG Sales data...</div>
+    <div id="hg-sales-content" style="display:none">
+      <div id="hg-data-freshness" style="text-align:right;font-size:0.65rem;color:#555;padding:0 8px 4px 0"></div>
+
+      <!-- Top KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Total Opps</div><div class="kpi-val" id="hg-kpi-total-opps">-</div></div>
+        <div class="kpi"><div class="kpi-label">Won</div><div class="kpi-val green" id="hg-kpi-won">-</div></div>
+        <div class="kpi"><div class="kpi-label">Open</div><div class="kpi-val" id="hg-kpi-open" style="color:#3b82f6">-</div></div>
+        <div class="kpi"><div class="kpi-label">Lost</div><div class="kpi-val" id="hg-kpi-lost" style="color:#ef4444">-</div></div>
+      </div>
+
+      <!-- Revenue KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Revenue</div><div class="kpi-val emerald" id="hg-kpi-revenue">-</div></div>
+        <div class="kpi"><div class="kpi-label">Close Rate</div><div class="kpi-val cyan" id="hg-kpi-close-rate">-</div></div>
+        <div class="kpi"><div class="kpi-label">Avg Deal</div><div class="kpi-val" id="hg-kpi-avg-deal">-</div></div>
+        <div class="kpi"><div class="kpi-label">Pipeline</div><div class="kpi-val" id="hg-kpi-pipeline" style="color:#eab308">-</div></div>
+      </div>
+
+      <!-- Lead KPIs -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr)">
+        <div class="kpi"><div class="kpi-label">Total Leads</div><div class="kpi-val" id="hg-kpi-leads">-</div></div>
+        <div class="kpi"><div class="kpi-label">Converted</div><div class="kpi-val green" id="hg-kpi-converted">-</div></div>
+        <div class="kpi"><div class="kpi-label">Total Sqft</div><div class="kpi-val cyan" id="hg-kpi-sqft">-</div></div>
+      </div>
+
+      <!-- Pipeline Funnel + Lead Sources -->
+      <div class="two-col">
+        <div class="col-card">
+          <h4>Opportunity Pipeline</h4>
+          <div id="hg-stage-funnel"></div>
+        </div>
+        <div class="col-card">
+          <h4>Lead Sources</h4>
+          <div id="hg-lead-sources"></div>
+        </div>
+      </div>
+
+      <!-- Monthly Revenue -->
+      <div class="section-hdr">Monthly Revenue</div>
+      <div id="hg-monthly-revenue" style="margin-bottom:20px"></div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <label>Stage:</label>
+        <select id="hg-stage-filter" onchange="filterHGSalesOpps()"></select>
+        <label>Source:</label>
+        <select id="hg-source-filter" onchange="filterHGSalesOpps()"></select>
+      </div>
+
+      <!-- Opportunities Table -->
+      <div class="section-hdr">All Opportunities <span id="hg-opp-count-label" style="font-weight:400;color:#555"></span></div>
+      <div style="overflow-x:auto">
+        <table class="lead-table" id="hg-opp-table">
+          <thead>
+            <tr>
+              <th style="cursor:pointer" onclick="sortHGSalesOpps('name')">Opportunity <span class="sort-arrow" id="hg-sort-name"></span></th>
+              <th style="cursor:pointer" onclick="sortHGSalesOpps('stage')">Stage <span class="sort-arrow" id="hg-sort-stage"></span></th>
+              <th style="cursor:pointer" onclick="sortHGSalesOpps('source')">Source <span class="sort-arrow" id="hg-sort-source"></span></th>
+              <th style="cursor:pointer" onclick="sortHGSalesOpps('type')">Type <span class="sort-arrow" id="hg-sort-type"></span></th>
+              <th style="cursor:pointer;text-align:right" onclick="sortHGSalesOpps('amount')">Amount <span class="sort-arrow" id="hg-sort-amount"></span></th>
+              <th style="cursor:pointer" onclick="sortHGSalesOpps('date')">Created <span class="sort-arrow" id="hg-sort-date"></span></th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody id="hg-opp-tbody"></tbody>
+        </table>
+      </div>
+
+      <div id="hg-sales-timestamp" style="text-align:right;font-size:0.625rem;color:#333;margin-top:12px"></div>
+    </div>
+  </div>
+
   <div id="panel-costco" class="panel">
     <div id="costco-loading" style="text-align:center;padding:40px;color:#555">Loading Costco data from Salesforce...</div>
     <div id="costco-content" style="display:none">
@@ -1359,7 +1505,7 @@ document.querySelectorAll('.tab').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
     var wrap = document.querySelector('.wrap');
-    if (btn.dataset.panel === 'costco' || btn.dataset.panel === 'hg-calendar') {
+    if (btn.dataset.panel === 'costco' || btn.dataset.panel === 'hg-sales' || btn.dataset.panel === 'hg-calendar') {
       wrap.style.maxWidth = '960px';
     } else {
       wrap.style.maxWidth = '640px';
@@ -1368,8 +1514,224 @@ document.querySelectorAll('.tab').forEach(btn => {
     if (btn.dataset.panel === 'costco' && !window._costcoLoaded) {
       loadCostcoData();
     }
+    // Load HG Sales data on first click
+    if (btn.dataset.panel === 'hg-sales' && !window._hgSalesLoaded) {
+      loadHGSalesData();
+    }
   });
 });
+
+// ── HG Sales Dashboard — Live Data ──
+var _hgSalesData = null;
+var _hgSalesOpps = [];
+var _hgSortCol = '';
+var _hgSortDir = 'asc';
+
+var HG_STAGE_COLORS = {
+  '1st Presentation Set': '#3b82f6',
+  'Not Sold - Needs Follow Up': '#eab308',
+  'Sales Closed Won - Needs Approval': '#a78bfa',
+  'Sales Closed Won - Approved': '#10b981',
+  'Job Scheduled': '#22d3ee',
+  'Complete - Unpaid': '#f97316',
+  'Completed - Paid': '#22c55e',
+  'Closed Lost': '#ef4444',
+  'Cancelled Contract': '#ef4444',
+};
+
+function loadHGSalesData() {
+  var url = 'hg-sales-data.json?' + Date.now();
+  fetch(url)
+    .then(function(r) {
+      if (!r.ok) throw new Error('Failed to load HG Sales data: ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      window._hgSalesLoaded = true;
+      _hgSalesData = data;
+      _hgSalesOpps = data.opportunities || [];
+      renderHGSalesDashboard();
+    })
+    .catch(function(err) {
+      $('hg-sales-loading').textContent = 'Failed to load data: ' + err.message;
+    });
+}
+
+function renderHGSalesDashboard() {
+  var s = _hgSalesData.summary;
+  var now = new Date();
+
+  // Data freshness
+  if (_hgSalesData.generated) {
+    var gen = new Date(_hgSalesData.generated);
+    var ago = Math.round((now - gen) / 60000);
+    var agoText = ago < 1 ? 'just now' : ago < 60 ? ago + 'm ago' : Math.round(ago / 60) + 'h ' + (ago % 60) + 'm ago';
+    $('hg-data-freshness').textContent = 'Data updated ' + agoText;
+    $('hg-data-freshness').style.color = ago > 60 ? '#f59e0b' : '#4ade80';
+  }
+
+  // KPIs
+  $('hg-kpi-total-opps').textContent = fmt(s.totalOpportunities);
+  $('hg-kpi-won').textContent = fmt(s.wonCount);
+  $('hg-kpi-open').textContent = fmt(s.openCount);
+  $('hg-kpi-lost').textContent = fmt(s.lostCount);
+  $('hg-kpi-revenue').textContent = fmtD(s.totalRevenue);
+  $('hg-kpi-close-rate').textContent = s.closeRate + '%';
+  $('hg-kpi-avg-deal').textContent = fmtD(s.avgDealSize);
+  $('hg-kpi-pipeline').textContent = fmtD(s.pipelineValue);
+  $('hg-kpi-leads').textContent = fmt(s.totalLeads);
+  $('hg-kpi-converted').textContent = fmt(s.convertedLeads);
+  $('hg-kpi-sqft').textContent = fmt(s.totalSqft);
+
+  // Pipeline funnel
+  var funnel = _hgSalesData.stageFunnel || [];
+  var maxStage = 0;
+  funnel.forEach(function(f) { if (f.count > maxStage) maxStage = f.count; });
+  var funnelHtml = '';
+  funnel.forEach(function(f) {
+    var pct = maxStage > 0 ? (f.count / maxStage * 100).toFixed(1) : 0;
+    var color = HG_STAGE_COLORS[f.stage] || '#555';
+    funnelHtml += '<div class="hg-bar-row">'
+      + '<span class="hg-bar-label" title="' + f.stage + '">' + f.stage + '</span>'
+      + '<div class="hg-bar-bg"><div class="hg-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>'
+      + '<span class="hg-bar-val">' + f.count + '</span></div>';
+  });
+  $('hg-stage-funnel').innerHTML = funnelHtml;
+
+  // Lead sources
+  var sources = _hgSalesData.leadSources || [];
+  var maxSrc = 0;
+  sources.forEach(function(s) { if (s.count > maxSrc) maxSrc = s.count; });
+  var srcHtml = '';
+  sources.forEach(function(s) {
+    var pct = maxSrc > 0 ? (s.count / maxSrc * 100).toFixed(1) : 0;
+    var revStr = s.revenue > 0 ? ' · ' + fmtD(s.revenue) : '';
+    srcHtml += '<div class="hg-bar-row">'
+      + '<span class="hg-bar-label" title="' + s.source + '">' + s.source + '</span>'
+      + '<div class="hg-bar-bg"><div class="hg-bar-fill" style="width:' + pct + '%;background:#6366f1"></div></div>'
+      + '<span class="hg-bar-val">' + s.count + '</span></div>';
+  });
+  $('hg-lead-sources').innerHTML = srcHtml;
+
+  // Monthly revenue
+  var months = _hgSalesData.monthlyRevenue || [];
+  var maxRev = 0;
+  months.forEach(function(m) { if (m.revenue > maxRev) maxRev = m.revenue; });
+  // Show last 12 months max
+  var recentMonths = months.slice(-12);
+  var monthHtml = '';
+  recentMonths.forEach(function(m) {
+    var pct = maxRev > 0 ? (m.revenue / maxRev * 100).toFixed(1) : 0;
+    var label = m.month.slice(2); // "26-01" from "2026-01"
+    monthHtml += '<div class="hg-month-row">'
+      + '<span class="hg-month-label">' + label + '</span>'
+      + '<div class="hg-month-bar"><div class="hg-month-fill" style="width:' + pct + '%"></div></div>'
+      + '<span class="hg-month-val">' + fmtD(m.revenue) + '</span></div>';
+  });
+  $('hg-monthly-revenue').innerHTML = monthHtml || '<div style="color:#555;font-size:0.75rem">No monthly data available</div>';
+
+  // Populate filters
+  var stageSel = $('hg-stage-filter');
+  stageSel.innerHTML = '<option value="all">All Stages</option>';
+  var stageSet = {};
+  _hgSalesOpps.forEach(function(o) { stageSet[o.stage] = (stageSet[o.stage] || 0) + 1; });
+  Object.keys(stageSet).sort().forEach(function(st) {
+    stageSel.innerHTML += '<option value="' + st + '">' + st + ' (' + stageSet[st] + ')</option>';
+  });
+
+  var srcSel = $('hg-source-filter');
+  srcSel.innerHTML = '<option value="all">All Sources</option>';
+  var srcSet = {};
+  _hgSalesOpps.forEach(function(o) { srcSet[o.leadSource] = (srcSet[o.leadSource] || 0) + 1; });
+  Object.keys(srcSet).sort().forEach(function(s) {
+    srcSel.innerHTML += '<option value="' + s + '">' + s + ' (' + srcSet[s] + ')</option>';
+  });
+
+  // Render table
+  renderHGOppTable(_hgSalesOpps);
+
+  // Timestamp
+  var ts = _hgSalesData.generated ? new Date(_hgSalesData.generated).toLocaleString() : '';
+  $('hg-sales-timestamp').textContent = 'Data refreshed: ' + ts;
+
+  $('hg-sales-loading').style.display = 'none';
+  $('hg-sales-content').style.display = 'block';
+}
+
+function renderHGOppTable(opps) {
+  var html = '';
+  opps.forEach(function(o) {
+    var stageColor = HG_STAGE_COLORS[o.stage] || '#666';
+    var pillClass = 'new';
+    if (o.stage.indexOf('Paid') >= 0 || o.stage.indexOf('Approved') >= 0) pillClass = 'converted';
+    else if (o.stage.indexOf('Lost') >= 0 || o.stage.indexOf('Cancel') >= 0) pillClass = 'lost';
+    else if (o.stage.indexOf('Follow') >= 0 || o.stage.indexOf('Unpaid') >= 0) pillClass = 'contacted';
+    else if (o.stage.indexOf('Scheduled') >= 0 || o.stage.indexOf('Presentation') >= 0) pillClass = 'qualified';
+
+    var amount = o.amount ? fmtD(o.amount) : '<span class="dim">&mdash;</span>';
+    var sfLink = o.sfUrl ? '<a class="lead-link sf" href="' + o.sfUrl + '" target="_blank">SF</a>' : '';
+
+    html += '<tr data-stage="' + o.stage + '" data-source="' + o.leadSource + '">'
+      + '<td><span class="name">' + o.name + '</span>'
+      + (o.accountName ? '<br><span class="dim">' + o.accountName + '</span>' : '') + '</td>'
+      + '<td><span class="status-pill ' + pillClass + '">' + o.stage + '</span></td>'
+      + '<td>' + o.leadSource + '</td>'
+      + '<td class="turf">' + (o.applicationType || o.jobType || '<span class="dim">&mdash;</span>') + '</td>'
+      + '<td class="amount">' + amount + '</td>'
+      + '<td><span class="dim">' + (o.createdDate || '') + '</span></td>'
+      + '<td><div class="lead-links">' + sfLink + '</div></td>'
+      + '</tr>';
+  });
+  $('hg-opp-tbody').innerHTML = html;
+  $('hg-opp-count-label').textContent = '(' + opps.length + ')';
+}
+
+function sortHGSalesOpps(col) {
+  if (_hgSortCol === col) {
+    _hgSortDir = _hgSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    _hgSortCol = col;
+    _hgSortDir = 'asc';
+  }
+  document.querySelectorAll('#hg-opp-table .sort-arrow').forEach(function(el) { el.className = 'sort-arrow'; });
+  var arrow = document.getElementById('hg-sort-' + col);
+  if (arrow) arrow.className = 'sort-arrow ' + _hgSortDir;
+
+  var sortKey = {
+    'name': function(o) { return (o.name || '').toLowerCase(); },
+    'stage': function(o) { return (o.stage || '').toLowerCase(); },
+    'source': function(o) { return (o.leadSource || '').toLowerCase(); },
+    'type': function(o) { return (o.applicationType || o.jobType || '').toLowerCase(); },
+    'amount': function(o) { return o.amount || 0; },
+    'date': function(o) { return o.createdDate || ''; },
+  };
+  var fn = sortKey[col];
+  if (!fn) return;
+
+  _hgSalesOpps.sort(function(a, b) {
+    var va = fn(a), vb = fn(b);
+    if (typeof va === 'number') return _hgSortDir === 'asc' ? va - vb : vb - va;
+    if (va < vb) return _hgSortDir === 'asc' ? -1 : 1;
+    if (va > vb) return _hgSortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  renderHGOppTable(_hgSalesOpps);
+  filterHGSalesOpps();
+}
+
+function filterHGSalesOpps() {
+  var stage = $('hg-stage-filter').value;
+  var source = $('hg-source-filter').value;
+  var rows = document.querySelectorAll('#hg-opp-table tbody tr');
+  var visible = 0;
+  rows.forEach(function(row) {
+    var show = (stage === 'all' || row.getAttribute('data-stage') === stage)
+      && (source === 'all' || row.getAttribute('data-source') === source);
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  $('hg-opp-count-label').textContent = '(' + visible + ' of ' + _hgSalesOpps.length + ')';
+}
 
 // ── Costco Dashboard — Live Data ──
 var _costcoData = null;
