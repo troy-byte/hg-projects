@@ -1611,36 +1611,49 @@ var HG_LOST_STAGES = {
 };
 
 function loadHGSalesData() {
-  var url = 'hg-sales-data.json?' + Date.now();
-  fetch(url)
+  var LIVE_URL = 'https://agm-pro--costco-lead-intake-hg-sales-dashboard-data.modal.run';
+  var FALLBACK_URL = 'hg-sales-data.json?' + Date.now();
+
+  function applyData(data) {
+    window._hgSalesLoaded = true;
+    _hgSalesRaw = data;
+    _hgSalesAllOpps = data.opportunities || [];
+    _hgSalesAllLeads = data.leads || [];
+    _hgSalesAllEvents = data.events || [];
+
+    // Show freshness
+    if (data.generated) {
+      var now = new Date();
+      var gen = new Date(data.generated);
+      var ago = Math.round((now - gen) / 60000);
+      var agoText = ago < 1 ? 'just now' : ago < 60 ? ago + 'm ago' : Math.round(ago / 60) + 'h ' + (ago % 60) + 'm ago';
+      $('hg-data-freshness').textContent = 'Data updated ' + agoText;
+      $('hg-data-freshness').style.color = ago > 60 ? '#f59e0b' : '#4ade80';
+    }
+
+    switchHGYear(_hgActiveYear);
+
+    $('hg-sales-loading').style.display = 'none';
+    $('hg-sales-content').style.display = 'block';
+  }
+
+  fetch(LIVE_URL)
     .then(function(r) {
-      if (!r.ok) throw new Error('Failed to load HG Sales data: ' + r.status);
+      if (!r.ok) throw new Error('Modal endpoint returned ' + r.status);
       return r.json();
     })
     .then(function(data) {
-      window._hgSalesLoaded = true;
-      _hgSalesRaw = data;
-      _hgSalesAllOpps = data.opportunities || [];
-      _hgSalesAllLeads = data.leads || [];
-      _hgSalesAllEvents = data.events || [];
-
-      // Show freshness
-      if (data.generated) {
-        var now = new Date();
-        var gen = new Date(data.generated);
-        var ago = Math.round((now - gen) / 60000);
-        var agoText = ago < 1 ? 'just now' : ago < 60 ? ago + 'm ago' : Math.round(ago / 60) + 'h ' + (ago % 60) + 'm ago';
-        $('hg-data-freshness').textContent = 'Data updated ' + agoText;
-        $('hg-data-freshness').style.color = ago > 60 ? '#f59e0b' : '#4ade80';
-      }
-
-      switchHGYear(_hgActiveYear);
-
-      $('hg-sales-loading').style.display = 'none';
-      $('hg-sales-content').style.display = 'block';
+      if (data.error) throw new Error(data.error);
+      applyData(data);
     })
     .catch(function(err) {
-      $('hg-sales-loading').textContent = 'Failed to load data: ' + err.message;
+      console.warn('Live HG Sales endpoint failed, falling back to static JSON:', err.message);
+      fetch(FALLBACK_URL)
+        .then(function(r) { return r.json(); })
+        .then(function(data) { applyData(data); })
+        .catch(function(err2) {
+          $('hg-sales-loading').textContent = 'Failed to load data: ' + err2.message;
+        });
     });
 }
 
