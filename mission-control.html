@@ -55,7 +55,7 @@
   <div class="stat"><div class="stat-value">4</div><div class="stat-label">Active Programs</div></div>
   <div class="stat"><div class="stat-value">2</div><div class="stat-label">Awaiting Tim</div></div>
   <div class="stat"><div class="stat-value">38</div><div class="stat-label">Zaps to Migrate</div></div>
-  <div class="stat"><div class="stat-value">2</div><div class="stat-label">Now</div></div>
+  <div class="stat"><div class="stat-value">3</div><div class="stat-label">Now</div></div>
   <div class="stat"><div class="stat-value">3</div><div class="stat-label">Next Up</div></div>
   <div class="stat"><div class="stat-value">5</div><div class="stat-label">Queued</div></div>
 </div>
@@ -64,7 +64,16 @@
 <div class="category">
   <div class="cat-header">
     <span class="cat-title">This Week &mdash; Priority</span>
-    <span class="cat-count">4 items</span>
+    <span class="cat-count">5 items</span>
+  </div>
+
+  <div class="task">
+    <span class="priority now">Now</span>
+    <div>
+      <div class="task-name">HG &harr; BarCloud Integration</div>
+      <div class="task-desc">AGM-driven inventory automation &mdash; top priority. On install stage, AGM fires webhook to Modal worker, which writes BarCloud Stock Issue with turf type + dye lot, then pushes draw record back to AGM + SF. Exec memo delivered Apr 9. Significant scope: no canonical bill of materials exists at HG today (post-its, loose docs, installer memory) &mdash; this build forces a canonical turf-type to materials map to exist for the first time. Must track turf type AND dye lot as first-class fields. BarCloud API is pull-only (no webhooks) &mdash; fine because AGM is the trigger. First step: BOM schema + dye lot data model in AGM. Mirror the FSM connector pattern for the Modal worker. SF becomes reporting destination, not trigger source. Eliminates manual BarCloud entry currently owned by office staff.</div>
+    </div>
+    <div class="task-meta"><a href="https://docs.google.com/document/d/10tyXtR-3YMY3xeZnc6YLm-TXr_W3lG5BGkaqZvtBMLE/edit">Exec Memo</a><br>AGM-driven<br>Top priority</div>
   </div>
 
   <div class="task">

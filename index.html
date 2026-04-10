@@ -913,14 +913,23 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
 
     <!-- AUTO:TRUE_NORTH_START -->
     <div class="stats" style="grid-template-columns: repeat(5, 1fr);">
-      <div class="stat"><div class="stat-label">Now</div><div class="stat-val r">8</div></div>
-      <div class="stat"><div class="stat-label">Next</div><div class="stat-val y">3</div></div>
+      <div class="stat"><div class="stat-label">Now</div><div class="stat-val r">9</div></div>
+      <div class="stat"><div class="stat-label">Next</div><div class="stat-val y">2</div></div>
       <div class="stat"><div class="stat-label">Queued</div><div class="stat-val w">1</div></div>
       <div class="stat"><div class="stat-label">Waiting</div><div class="stat-val" style="color:#f97316;">2</div></div>
       <div class="stat"><div class="stat-label">Recurring</div><div class="stat-val b">3</div></div>
     </div>
 
-    <div class="section-hdr">Now &mdash; This Week<span class="count">(8)</span></div>
+    <div class="section-hdr">Now &mdash; This Week<span class="count">(9)</span></div>
+
+    <div class="task">
+      <div class="task-check"></div>
+      <div class="task-info">
+        <div class="task-name">HG ↔ BarCloud Integration</div>
+        <div class="task-desc">AGM-driven inventory automation &mdash; TOP PRIORITY. On install stage, AGM fires webhook to Modal worker, which writes BarCloud Stock Issue with turf type + dye lot, then pushes draw record back to AGM + SF. Exec memo delivered Apr 9 &mdash; significant scope. No canonical bill of materials exists at HG today &mdash; this build forces a canonical turf-type &rarr; materials map to exist for the first time. Must track turf type AND dye lot as first-class fields. BarCloud API is pull-only (no webhooks). First step: BOM schema + dye lot data model in AGM. Mirror FSM connector pattern for Modal worker. SF becomes reporting destination, not trigger source. Eliminates manual BarCloud entry currently owned by office staff.</div>
+        <div class="task-meta"><span class="b b-hg">Integrations</span> <span class="b b-now">Now</span> <a href="https://docs.google.com/document/d/10tyXtR-3YMY3xeZnc6YLm-TXr_W3lG5BGkaqZvtBMLE/edit" target="_blank">Exec Memo &rarr;</a></div>
+      </div>
+    </div>
 
     <div class="task">
       <div class="task-check"></div>
@@ -994,7 +1003,7 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
       </div>
     </div>
 
-    <div class="section-hdr">Next Up<span class="count">(3)</span></div>
+    <div class="section-hdr">Next Up<span class="count">(2)</span></div>
 
     <div class="task">
       <div class="task-check"></div>
@@ -1011,15 +1020,6 @@ h1, h2, h3, h4, .section-hdr, .stat-label {
         <div class="task-name">NP Digital &mdash; Monthly Report Review</div>
         <div class="task-desc">Performance dashboard and reporting from NP Digital. Monthly SEO and paid media updates.</div>
         <div class="task-meta"><span class="b b-hg">Marketing</span> <span class="b b-next">Next</span></div>
-      </div>
-    </div>
-
-    <div class="task">
-      <div class="task-check"></div>
-      <div class="task-info">
-        <div class="task-name">HG ↔ BarCloud Integration</div>
-        <div class="task-desc">AGM-driven inventory automation: on install stage, fire webhook to Modal worker, write BarCloud Stock Issue with turf type + dye lot, push draw record back to AGM + SF. Exec memo sent to Tim + Troy Apr 9 &mdash; active project with significant scope. First step: BOM schema + dye lot data model in AGM (no canonical bill of materials exists at HG today). BarCloud API is pull-only, no webhooks. Open unknowns: BarCloud API rate limits. Mirror existing FSM connector pattern for Modal worker. SF becomes a reporting destination, not a trigger source.</div>
-        <div class="task-meta"><span class="b b-hg">Integrations</span> <span class="b b-next">Next</span> <a href="https://docs.google.com/document/d/10tyXtR-3YMY3xeZnc6YLm-TXr_W3lG5BGkaqZvtBMLE/edit" target="_blank">Exec Memo (Google Doc)</a></div>
       </div>
     </div>
 
